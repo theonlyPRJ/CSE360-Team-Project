@@ -160,7 +160,7 @@ public class ViewRole2Home {
 		setupLabelUI(label_UserDetails, "Arial", 20, width, Pos.BASELINE_LEFT, 20, 55);
 		
 		setupButtonUI(button_UpdateThisUser, "Dialog", 18, 170, Pos.CENTER, 610, 45);
-		button_UpdateThisUser.setOnAction((_) -> {ControllerRole2Home.performUpdate(); });
+		button_UpdateThisUser.setOnAction((event) -> {ControllerRole2Home.performUpdate(); });
 		
 		// GUI Area 2
 		
@@ -169,10 +169,10 @@ public class ViewRole2Home {
 		
 		// GUI Area 3
         setupButtonUI(button_Logout, "Dialog", 18, 250, Pos.CENTER, 20, 540);
-        button_Logout.setOnAction((_) -> {ControllerRole2Home.performLogout(); });
+        button_Logout.setOnAction((event) -> {ControllerRole2Home.performLogout(); });
         
         setupButtonUI(button_Quit, "Dialog", 18, 250, Pos.CENTER, 300, 540);
-        button_Quit.setOnAction((_) -> {ControllerRole2Home.performQuit(); });
+        button_Quit.setOnAction((event) -> {ControllerRole2Home.performQuit(); });
 
 		// This is the end of the GUI initialization code
 		
