@@ -1,6 +1,17 @@
 package guiAdminHome;
 
 import database.Database;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.Scene;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import entityClasses.User;
+import java.util.List;
 
 /*******
  * <p> Title: GUIAdminHomePage Class. </p>
@@ -134,20 +145,81 @@ public class ControllerAdminHome {
 		ViewAdminHome.alertNotImplemented.showAndWait();
 	}
 	
+	// Helper class for TableView binding
+	public static class UserTableEntry {
+		private final String username;
+		private final String fullName;
+		private final String email;
+		private final String roles;
+		
+		public UserTableEntry(String username, String fullName, String email, String roles) {
+			this.username = username;
+			this.fullName = fullName;
+			this.email= email;
+			this.roles = roles;
+		}
+		
+		public String getUsername() {return username;}
+		public String getFullName() {return fullName;}
+		public String getEmail() {return email;}
+		public String getRoles() {return roles;}
+	}
+	
 	/**********
 	 * <p> 
 	 * 
 	 * Title: listUsers () Method. </p>
 	 * 
-	 * <p> Description: Protected method that is currently a stub informing the user that
-	 * this function has not yet been implemented. </p>
+	 * <p> Description: list user function 9-19-2026. </p>
 	 */
 	protected static void listUsers() {
-		System.out.println("\n*** WARNING ***: List Users Not Yet Implemented");
-		ViewAdminHome.alertNotImplemented.setTitle("*** WARNING ***");
-		ViewAdminHome.alertNotImplemented.setHeaderText("List User Issue");
-		ViewAdminHome.alertNotImplemented.setContentText("List Users Not Yet Implemented");
-		ViewAdminHome.alertNotImplemented.showAndWait();
+		// 1. Fetch user accounts from database
+	    List<User> userList = theDatabase.getAllUsers();
+	    ObservableList<User> data = FXCollections.observableArrayList(userList);
+
+	    // 2. Build JavaFX TableView
+	    TableView<UserTableEntry> table = new TableView<>();
+
+	    TableColumn<UserTableEntry, String> colUser = new TableColumn<>("Username");
+	    colUser.setCellValueFactory(new PropertyValueFactory<>("username"));
+
+	    TableColumn<UserTableEntry, String> colName = new TableColumn<>("Name");
+	    colName.setCellValueFactory(new PropertyValueFactory<>("fullName"));
+
+	    TableColumn<UserTableEntry, String> colEmail = new TableColumn<>("Email");
+	    colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+
+	    TableColumn<UserTableEntry, String> colRoles = new TableColumn<>("Assigned Roles");
+	    colRoles.setCellValueFactory(new PropertyValueFactory<>("roles"));
+
+	    table.getColumns().addAll(colUser, colName, colEmail, colRoles);
+
+	    // Populate rows
+	    ObservableList<UserTableEntry> tableEntries = FXCollections.observableArrayList();
+	    for (User u : userList) {
+	        String fullName = u.getFirstName() + " " + u.getLastName();
+	        
+	        // Build roles string
+	        StringBuilder roles = new StringBuilder();
+	        if (u.getAdminRole()) roles.append("Admin ");
+	        if (u.getNewRole1()) roles.append("Role1 ");
+	        if (u.getNewRole2()) roles.append("Role2 ");
+
+	        tableEntries.add(new UserTableEntry(u.getUserName(), fullName.trim(), u.getEmailAddress(), roles.toString().trim()));
+	    }
+	    table.setItems(tableEntries);
+
+	    // 3. Display in a Modal Window
+	    Stage dialog = new Stage();
+	    dialog.initModality(Modality.APPLICATION_MODAL);
+	    dialog.setTitle("All System User Accounts");
+
+	    VBox layout = new VBox(10);
+	    layout.getChildren().add(table);
+
+	    Scene scene = new Scene(layout, 600, 400);
+	    dialog.setScene(scene);
+	    dialog.showAndWait();
 	}
 	
 	/**********
