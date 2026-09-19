@@ -23,7 +23,6 @@ public class ControllerUserUpdate {
 	The User Interface Actions for this page
 	
 	**********************************************************************************************/
-
 	
 	/**********
 	 * <p> Method: public goToUserHomePage(Stage theStage, User theUser) </p>

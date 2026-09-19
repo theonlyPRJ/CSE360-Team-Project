@@ -839,6 +839,53 @@ public class Database {
 	    }
 	}
 	
+	/**
+	 * Fetches all user accounts from userDB.
+	 * @return List of User objects containing username, name details, email, and assigned roles.
+	 */
+	public List<User> getAllUsers() {
+		List<User> users = new ArrayList<>();
+		String query = "SELECT * FROM userDB";
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				User user = new User(
+					rs.getString("username"),
+					rs.getString("password"),
+					rs.getString("firstName"),
+					rs.getString("middleName"),
+					rs.getString("lastName"),
+					rs.getString("preferredFirstName"),
+					rs.getString("emailAddress"),
+					rs.getBoolean("adminRole"),
+					rs.getBoolean("newRole1"),
+					rs.getBoolean("newRole2")
+				);
+				users.add(user);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return users;
+	}
+	
+	/**
+	 * Updates updated fields (FirstName, LastName, EmailAddress) for a given username.
+	 */
+	public boolean updateUserAccount(String username, String firstName, String lastName, String email) {
+		String query = "UPDATE userDB SET firstName = ?, lastName = ?, emailAddress = ? WHERE userName = ?";
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setString(1,  firstName);
+			pstmt.setString(2,  lastName);
+			pstmt.setString(3,  email);
+			pstmt.setString(4,  username);
+			pstmt.executeUpdate();
+			return true;
+		} catch (SQLException e ) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 	
 	/*******
 	 * <p> Method: boolean updateUserRole(String username, String role, String value) </p>

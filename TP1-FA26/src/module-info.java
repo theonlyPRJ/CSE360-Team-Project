@@ -3,4 +3,5 @@ module FoundationsF26 {
 	requires java.sql;
 	
 	opens applicationMain to javafx.graphics, javafx.fxml;
+	opens guiAdminHome to javafx.base, javafx.controls;
 }
