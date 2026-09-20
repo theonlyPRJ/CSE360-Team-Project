@@ -116,9 +116,19 @@ public class Database {
 				+ "emailAddress VARCHAR(255), "
 				+ "adminRole BOOL DEFAULT FALSE, "
 				+ "newRole1 BOOL DEFAULT FALSE, "
-				+ "newRole2 BOOL DEFAULT FALSE)";
+				+ "newRole2 BOOL DEFAULT FALSE, "
+				+ "oneTimePassword VARCHAR(255) DEFAULT NULL, "
+				+ "isOtpActive BOOL DEFAULT FALSE)";
 		statement.execute(userTable);
 		
+		// Ensure column additions for existing tables
+		try {
+			statement.execute("ALTER TABLE userDB ADD COLUMN IF NOT EXISTS oneTimePassword VARCHAR(255) DEFAULT NULL");
+			statement.execute("ALTER TABLE userDB ADD COLUMN IF NOT EXISTS isOtpActive BOOL DEFAULT FALSE");
+		} catch (SQLException ignored) {
+			// Columns already exist
+		}
+
 		// Create the invitation codes table
 	    String invitationCodesTable = "CREATE TABLE IF NOT EXISTS InvitationCodes ("
 	            + "code VARCHAR(10) PRIMARY KEY, "
@@ -527,7 +537,7 @@ public class Database {
 	        	int counter = rs.getInt(1);
 	            // Only do the remove if the code is still in the invitation table
 	        	if (counter > 0) {
-        			query = "DELETE FROM InvitationCodes WHERE code = ?";
+ 		 			query = "DELETE FROM InvitationCodes WHERE code = ?";
 	        		try (PreparedStatement pstmt2 = connection.prepareStatement(query)) {
 	        			pstmt2.setString(1, code);
 	        			pstmt2.executeUpdate();
@@ -1018,47 +1028,90 @@ public class Database {
 
 	
 	/*******
-	 * <p> Debugging method</p>
+	 * <p> Method: boolean setOneTimePassword(String username, String otp) </p>
 	 * 
-	 * <p> Description: Debugging method that dumps the database of the console.</p>
+	 * <p> Description: Saves a temporary one-time password for a user and sets isOtpActive to true.</p>
 	 * 
-	 * @throws SQLException if there is an issues accessing the database.
-	 * 
+	 * @param username specifies the target user
+	 * @param otp specifies the one-time password
+	 * @return true if successful, else false
 	 */
-	// Dumps the database.
-	public void dump() throws SQLException {
-		String query = "SELECT * FROM userDB";
-		ResultSet resultSet = statement.executeQuery(query);
-		ResultSetMetaData meta = resultSet.getMetaData();
-		while (resultSet.next()) {
-		for (int i = 0; i < meta.getColumnCount(); i++) {
-		System.out.println(
-		meta.getColumnLabel(i + 1) + ": " +
-				resultSet.getString(i + 1));
+	public boolean setOneTimePassword(String username, String otp) {
+		String query = "UPDATE userDB SET oneTimePassword = ?, isOtpActive = TRUE WHERE userName = ?";
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setString(1, otp);
+			pstmt.setString(2, username);
+			int rowsAffected = pstmt.executeUpdate();
+			return rowsAffected > 0;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
 		}
-		System.out.println();
-		}
-		resultSet.close();
 	}
 
+	/*******
+	 * <p> Method: boolean isOtpActive(String username) </p>
+	 * 
+	 * <p> Description: Checks if an OTP reset state is currently active for the target user.</p>
+	 * 
+	 * @param username specifies the user to check
+	 * @return true if active, else false
+	 */
+	public boolean isOtpActive(String username) {
+		String query = "SELECT isOtpActive FROM userDB WHERE userName = ?";
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setString(1, username);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				return rs.getBoolean("isOtpActive");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 	/*******
-	 * <p> Method: void closeConnection()</p>
+	 * <p> Method: boolean validateOTPLogin(String username, String enteredPassword) </p>
 	 * 
-	 * <p> Description: Closes the database statement and connection.</p>
+	 * <p> Description: Verifies if user credentials match an active One-Time Password.</p>
 	 * 
+	 * @param username specifies the username
+	 * @param enteredPassword specifies the OTP candidate
+	 * @return true if valid active OTP login, else false
 	 */
-	// Closes the database statement and connection.
-	public void closeConnection() {
-		try{ 
-			if(statement!=null) statement.close(); 
-		} catch(SQLException se2) { 
-			se2.printStackTrace();
-		} 
-		try { 
-			if(connection!=null) connection.close(); 
-		} catch(SQLException se){ 
-			se.printStackTrace(); 
-		} 
+	public boolean validateOTPLogin(String username, String enteredPassword) {
+		String query = "SELECT * FROM userDB WHERE userName = ? AND oneTimePassword = ? AND isOtpActive = TRUE";
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setString(1, username);
+			pstmt.setString(2, enteredPassword);
+			ResultSet rs = pstmt.executeQuery();
+			return rs.next();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	/*******
+	 * <p> Method: boolean resetPasswordWithOTP(String username, String newPassword) </p>
+	 * 
+	 * <p> Description: Resets password, clears the active OTP, and disables OTP status.</p>
+	 * 
+	 * @param username specifies the target user
+	 * @param newPassword specifies the user's updated password
+	 * @return true if successful, else false
+	 */
+	public boolean resetPasswordWithOTP(String username, String newPassword) {
+		String query = "UPDATE userDB SET password = ?, oneTimePassword = NULL, isOtpActive = FALSE WHERE userName = ?";
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setString(1, newPassword);
+			pstmt.setString(2, username);
+			int rowsAffected = pstmt.executeUpdate();
+			return rowsAffected > 0;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 }

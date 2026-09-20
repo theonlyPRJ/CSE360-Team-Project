@@ -15,6 +15,7 @@ package entityClasses;
 
 public class User {
 	
+	
 	/*
 	 * These are the private attributes for this entity object
 	 */
@@ -28,6 +29,8 @@ public class User {
     private boolean adminRole;
     private boolean role1;
     private boolean role2;
+    private String oneTimePassword = null;
+    private boolean isOtpActive = false;
     
     
     /*****
@@ -110,8 +113,14 @@ public class User {
      * 
      */
     // Sets the role2 user.
+    
     public void setRole2User(boolean role) {
     	this.role2=role;
+    }
+    
+    public void setOneTimePassword(String otp) { 
+        this.oneTimePassword = otp; 
+        this.isOtpActive = true; 
     }
 
     
@@ -197,6 +206,8 @@ public class User {
      */
     // Gets the current value of the Student role attribute.
     public String getEmailAddress() { return emailAddress; }
+    
+    public String getOneTimePassword() { return oneTimePassword; }
 
     public void setUserName(String s) { userName = s; }
     public void setPassword(String s) { password = s; }
@@ -258,5 +269,11 @@ public class User {
     	if (role1) numRoles++;
     	if (role2) numRoles++;
     	return numRoles;
+    }
+    
+    public boolean isOtpActive() { return isOtpActive; }
+    public void clearOtp() { 
+        this.oneTimePassword = null; 
+        this.isOtpActive = false; 
     }
 }
