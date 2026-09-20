@@ -128,23 +128,29 @@ public class ControllerAddRemoveRoles {
 		// not show a role to add that the user already has!)
 		ViewAddRemoveRoles.addList.clear();
 		ViewAddRemoveRoles.addList.add("<Select a role>");
+		// Add Admin if the user does not currently have it
 		if (!theDatabase.getCurrentAdminRole())
 			ViewAddRemoveRoles.addList.add("Admin");
+		// Replace Role1 with Contributor if the user does not currently have it
 		if (!theDatabase.getCurrentNewRole1())
-			ViewAddRemoveRoles.addList.add("Role1");
+			ViewAddRemoveRoles.addList.add("Contributor");
+		// Replace Role2 with Viewer if the user does not currently have it
 		if (!theDatabase.getCurrentNewRole2())
-			ViewAddRemoveRoles.addList.add("Role2");
+			ViewAddRemoveRoles.addList.add("Viewer");
 
 		// Create the list of roles that could be removed for the currently selected user (e.g., Do
 		// not show a role to remove that the user does not have!)
 		ViewAddRemoveRoles.removeList.clear();
 		ViewAddRemoveRoles.removeList.add("<Select a role>");
+		// Add Admin if the user currently has it
 		if (theDatabase.getCurrentAdminRole())
 			ViewAddRemoveRoles.removeList.add("Admin");
+		// Replace Role1 with Contributor if the user currently has it
 		if (theDatabase.getCurrentNewRole1())
-			ViewAddRemoveRoles.removeList.add("Role1");
+			ViewAddRemoveRoles.removeList.add("Contributor");
+		// Replace Role2 with Viewer if the user currently has it
 		if (theDatabase.getCurrentNewRole2())
-			ViewAddRemoveRoles.removeList.add("Role2");
+			ViewAddRemoveRoles.removeList.add("Viewer");
 		
 		// Create the list or roles that the user currently has with proper use of a comma between
 		// items
@@ -158,21 +164,23 @@ public class ControllerAddRemoveRoles {
 		}
 		
 		// Roles 1 - It could be at the head of the list or later in the list
+		// Display Contributor instead of Role1 in active role labels
 		if (theDatabase.getCurrentNewRole1()) {
 			if (notTheFirst)
-				theCurrentRoles += ", Role1"; 
+				theCurrentRoles += ", Contributor"; 
 			else {
-				theCurrentRoles += "Role1";
+				theCurrentRoles += "Contributor";
 				notTheFirst = true;
 			}
 		}
 
 		// Roles 2 - It could be at the head of the list or later in the list
+		// Display Viewer instead of Role2 in active role labels
 		if (theDatabase.getCurrentNewRole2()) {
 			if (notTheFirst)
-				theCurrentRoles += ", Role2"; 
+				theCurrentRoles += ", Viewer"; 
 			else {
-				theCurrentRoles += "Role2";
+				theCurrentRoles += "Viewer";
 				notTheFirst = true;
 			}
 		}
@@ -215,9 +223,17 @@ public class ControllerAddRemoveRoles {
 		// If the selection is the list header (e.g., "<Select a role>") don't do anything
 		if (ViewAddRemoveRoles.theAddRole.compareTo("<Select a role>") != 0) {
 			
+			// Map functional role display names to underlying database role keys
+			String dbRoleKey = ViewAddRemoveRoles.theAddRole;
+			if (ViewAddRemoveRoles.theAddRole.equals("Contributor")) {
+				dbRoleKey = "Role1";
+			} else if (ViewAddRemoveRoles.theAddRole.equals("Viewer")) {
+				dbRoleKey = "Role2";
+			}
+			
 			// If an actual role was selected, update the database entry for that user for the role
 			if (theDatabase.updateUserRole(ViewAddRemoveRoles.theSelectedUser,
-					ViewAddRemoveRoles.theAddRole, "true") ) {
+					dbRoleKey, "true") ) {
 				ViewAddRemoveRoles.combobox_SelectRoleToAdd = new ComboBox <String>();
 				ViewAddRemoveRoles.combobox_SelectRoleToAdd.setItems(FXCollections.
 					observableArrayList(ViewAddRemoveRoles.addList));
@@ -244,12 +260,28 @@ public class ControllerAddRemoveRoles {
 		// If the selection is the list header (e.g., "<Select a role>") don't do anything
 		if (ViewAddRemoveRoles.theRemoveRole.compareTo("<Select a role>") != 0) {
 			
+			// Guard: Prevent the currently logged-in Admin from removing their own Admin role
+			if (ViewAddRemoveRoles.theRemoveRole.equals("Admin") && 
+				ViewAddRemoveRoles.theSelectedUser.equals(ViewAddRemoveRoles.theUser.getUserName())) {
+				System.out.println("*** Admin self-demotion prevented");
+				return;
+			}
+			
+			// Map functional role display names to underlying database role keys
+			String dbRoleKey = ViewAddRemoveRoles.theRemoveRole;
+			if (ViewAddRemoveRoles.theRemoveRole.equals("Contributor")) {
+				dbRoleKey = "Role1";
+			} else if (ViewAddRemoveRoles.theRemoveRole.equals("Viewer")) {
+				dbRoleKey = "Role2";
+			}
+			
 			// If an actual role was selected, update the database entry for that user for the role
 			if (theDatabase.updateUserRole(ViewAddRemoveRoles.theSelectedUser, 
-					ViewAddRemoveRoles.theRemoveRole, "false") ) {
+					dbRoleKey, "false") ) {
+				// Rebind to removeList instead of addList so selection state remains synchronized
 				ViewAddRemoveRoles.combobox_SelectRoleToRemove = new ComboBox <String>();
 				ViewAddRemoveRoles.combobox_SelectRoleToRemove.setItems(FXCollections.
-					observableArrayList(ViewAddRemoveRoles.addList));
+					observableArrayList(ViewAddRemoveRoles.removeList));
 				ViewAddRemoveRoles.combobox_SelectRoleToRemove.getSelectionModel().
 					clearAndSelect(0);		
 				setupSelectedUser();
