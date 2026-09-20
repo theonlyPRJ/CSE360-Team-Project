@@ -72,8 +72,17 @@ public class ControllerAdminHome {
 		
 		// Inform the user that the invitation has been sent and display the invitation code
 		String theSelectedRole = (String) ViewAdminHome.combobox_SelectRole.getValue();
+
+		// Map functional role display names to underlying database role keys
+		String dbRoleKey = theSelectedRole;
+		if ("Contributor".equals(theSelectedRole)) {
+			dbRoleKey = "Role1";
+		} else if ("Viewer".equals(theSelectedRole)) {
+			dbRoleKey = "Role2";
+		}
+
 		String invitationCode = theDatabase.generateInvitationCode(emailAddress,
-				theSelectedRole);
+				dbRoleKey);
 		String msg = "Code: " + invitationCode + " for role " + theSelectedRole + 
 				" was sent to: " + emailAddress;
 		System.out.println(msg);
@@ -178,9 +187,10 @@ public class ControllerAdminHome {
 	 * @param emailAddress	This String holds what is expected to be an email address
 	 */
 	protected static boolean invalidEmailAddress(String emailAddress) {
-		if (emailAddress.length() == 0) {
+		// Verify email is non-empty and enforces the universal 320-character maximum ceiling
+		if (emailAddress == null || emailAddress.length() == 0 || emailAddress.length() > 320) {
 			ViewAdminHome.alertEmailError.setContentText(
-					"Correct the email address and try again.");
+					"Correct the email address (1-320 characters) and try again.");
 			ViewAdminHome.alertEmailError.showAndWait();
 			return true;
 		}
