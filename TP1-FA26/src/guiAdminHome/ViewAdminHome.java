@@ -88,7 +88,7 @@ public class ViewAdminHome {
 	protected static Label label_InvitationEmailAddress = new Label("Email Address");
 	protected static TextField text_InvitationEmailAddress = new TextField();
 	protected static ComboBox <String> combobox_SelectRole = new ComboBox <String>();
-	protected static String [] roles = {"Admin", "Role1", "Role2"};
+	protected static String [] roles = {"Admin", "Contributor", "Viewer"};
 	protected static Button button_SendInvitation = new Button("Send Invitation");
 	protected static Alert alertEmailError = new Alert(AlertType.INFORMATION);
 	protected static Alert alertEmailSent = new Alert(AlertType.INFORMATION);
@@ -231,7 +231,7 @@ public class ViewAdminHome {
 		setupTextUI(text_InvitationEmailAddress, "Arial", 16, 360, Pos.BASELINE_LEFT,
 		130, 205, true);
 	
-		setupComboBoxUI(combobox_SelectRole, "Dialog", 16, 90, 500, 205);
+		setupComboBoxUI(combobox_SelectRole, "Dialog", 16, 120, 500, 205);
 	
 		List<String> list = new ArrayList<String>();	// Create a new list empty list of the
 		for (int i = 0; i < roles.length; i++) {		// roles this code currently supports

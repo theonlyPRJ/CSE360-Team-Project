@@ -120,8 +120,8 @@ public class ControllerAdminHome {
 
 	    String theSelectedRole = (String) ViewAdminHome.combobox_SelectRole.getValue();
 	    String dbRoleKey = theSelectedRole;
-	    if ("Contributor".equals(theSelectedRole)) dbRoleKey = "Role1";
-	    else if ("Viewer".equals(theSelectedRole)) dbRoleKey = "Role2";
+	    if ("Contributor".equals(theSelectedRole)) dbRoleKey = "Contributor";
+	    else if ("Viewer".equals(theSelectedRole)) dbRoleKey = "Viewer";
 
 	    String invitationCode = theDatabase.generateInvitationCode(emailAddress, dbRoleKey);
 	    String msg = "Code: " + invitationCode + " for role " + theSelectedRole +
@@ -256,8 +256,8 @@ public class ControllerAdminHome {
 	        // Build roles string
 	        StringBuilder roles = new StringBuilder();
 	        if (u.getAdminRole()) roles.append("Admin ");
-	        if (u.getNewRole1()) roles.append("Role1 ");
-	        if (u.getNewRole2()) roles.append("Role2 ");
+	        if (u.getNewRole1()) roles.append("Contributor ");
+	        if (u.getNewRole2()) roles.append("Viewer ");
 
 	        tableEntries.add(new UserTableEntry(u.getUserName(), fullName.trim(), u.getEmailAddress(), roles.toString().trim()));
 	    }
