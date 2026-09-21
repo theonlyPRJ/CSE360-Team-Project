@@ -1,6 +1,6 @@
-package guiRole2;
+package guiViewer;
 
-public class ModelRole2Home {
+public class ModelViewerHome {
 
 /*******
  * <p> Title: ModelRole2Home Class. </p>

@@ -100,6 +100,11 @@ public class User {
     	this.role1=role;
     }
 
+    // Setter for Contributor role alias
+    public void setContributorRole(boolean role) {
+        this.role1 = role;
+    }
+
     
     /*****
      * <p> Method: void setRole2User(boolean role) </p>
@@ -112,6 +117,11 @@ public class User {
     // Sets the role2 user.
     public void setRole2User(boolean role) {
     	this.role2=role;
+    }
+
+    // Setter for Viewer role alias
+    public void setViewerRole(boolean role) {
+        this.role2 = role;
     }
 
     
@@ -230,6 +240,9 @@ public class User {
     // Gets the current value of the role1 attribute.
 	public boolean getNewRole1() { return role1; }
 
+    // Getter for Contributor role alias
+    public boolean getContributorRole() { return role1; }
+
     
     /*****
      * <p> Method: String getRole2() </p>
@@ -241,6 +254,9 @@ public class User {
      */
     // Gets the current value of the role2 attribute.
     public boolean getNewRole2() { return role2; }
+
+    // Getter for Viewer role alias
+    public boolean getViewerRole() { return role2; }
 
         
     /*****

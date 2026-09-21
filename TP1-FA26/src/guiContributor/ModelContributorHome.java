@@ -1,6 +1,6 @@
-package guiRole1;
+package guiContributor;
 
-public class ModelRole1Home {
+public class ModelContributorHome {
 
 /*******
  * <p> Title: ModelRole1Home Class. </p>
