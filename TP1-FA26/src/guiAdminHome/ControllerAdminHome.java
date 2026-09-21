@@ -55,86 +55,84 @@ public class ControllerAdminHome {
 	private static Database theDatabase = applicationMain.FoundationsMain.database;
 
 	protected static void deleteUser() {
-		String targetUser = "";
-		if (ViewAdminHome.combobox_SelectUser != null && ViewAdminHome.combobox_SelectUser.getValue() != null) {
-			targetUser = (String) ViewAdminHome.combobox_SelectUser.getValue();
-		}
+	    String targetUser = "";
+	    if (ViewAdminHome.combobox_SelectUser.getValue() != null) {
+	        targetUser = ViewAdminHome.combobox_SelectUser.getValue();
+	    }
 
-		if (targetUser.isEmpty() || targetUser.equals("<Select a User>")) {
-			Alert alert = new Alert(AlertType.WARNING);
-			alert.setTitle("Selection Error");
-			alert.setHeaderText(null);
-			alert.setContentText("Please select a valid user to delete.");
-			alert.showAndWait();
-			return;
-		}
+	    if (targetUser.isEmpty() || targetUser.equals("<Select a User>")) {
+	        Alert alert = new Alert(AlertType.WARNING);
+	        alert.setTitle("Selection Error");
+	        alert.setHeaderText(null);
+	        alert.setContentText("Please select a valid user to delete.");
+	        alert.showAndWait();
+	        return;
+	    }
 
-		// Admin cannot delete their own account
-		if (targetUser.equalsIgnoreCase(ViewAdminHome.theUser.getUserName())) {
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setTitle("Action Denied");
-			alert.setHeaderText(null);
-			alert.setContentText("An admin is not allowed to remove that admin's access.");
-			alert.showAndWait();
-			return;
-		}
+	    if (targetUser.equalsIgnoreCase(ViewAdminHome.theUser.getUserName())) {
+	        Alert alert = new Alert(AlertType.ERROR);
+	        alert.setTitle("Action Denied");
+	        alert.setHeaderText(null);
+	        alert.setContentText("An admin is not allowed to remove that admin's access.");
+	        alert.showAndWait();
+	        return;
+	    }
 
+	    Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
+	    confirmAlert.setTitle("Confirm Deletion");
+	    confirmAlert.setHeaderText(null);
+	    confirmAlert.setContentText("Are you sure?");
+	    ButtonType buttonYes = new ButtonType("Yes");
+	    ButtonType buttonNo = new ButtonType("No");
+	    confirmAlert.getButtonTypes().setAll(buttonYes, buttonNo);
 
-		// Exact required prompt: "Are you sure?"
-		Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
-		confirmAlert.setTitle("Confirm Deletion");
-		confirmAlert.setHeaderText(null);
-		confirmAlert.setContentText("Are you sure?");
+	    Optional<ButtonType> result = confirmAlert.showAndWait();
+	    if (result.isPresent() && result.get() == buttonYes) {
+	        if (theDatabase.deleteUser(targetUser)) {
+	            Alert infoAlert = new Alert(AlertType.INFORMATION);
+	            infoAlert.setTitle("Success");
+	            infoAlert.setHeaderText(null);
+	            infoAlert.setContentText("User account '" + targetUser + "' has been successfully deleted.");
+	            infoAlert.showAndWait();
 
-		ButtonType buttonYes = new ButtonType("Yes");
-		ButtonType buttonNo = new ButtonType("No");
-		confirmAlert.getButtonTypes().setAll(buttonYes, buttonNo);
+	            ViewAdminHome.refreshUserList();
+	            ViewAdminHome.label_NumberOfUsers.setText("Number of users: " + theDatabase.getNumberOfUsers());
+	        } else {
+	            Alert errorAlert = new Alert(AlertType.ERROR);
+	            errorAlert.setTitle("Database Error");
+	            errorAlert.setHeaderText(null);
+	            errorAlert.setContentText("Failed to delete user account from the database.");
+	            errorAlert.showAndWait();
+	        }
+	    }
+	}
 
-		Optional<ButtonType> result = confirmAlert.showAndWait();
+	protected static void performInvitation() {
+	    String emailAddress = ViewAdminHome.text_InvitationEmailAddress.getText();
+	    if (invalidEmailAddress(emailAddress)) return;
 
-		// Only execute on explicit Yes
-		if (result.isPresent() && result.get() == buttonYes) {
-			boolean success = theDatabase.deleteUser(targetUser);
-			if (success) {
-				Alert infoAlert = new Alert(AlertType.INFORMATION);
-				infoAlert.setTitle("Success");
-				infoAlert.setHeaderText(null);
-				infoAlert.setContentText("User account '" + targetUser + "' has been successfully deleted.");
-				infoAlert.showAndWait();
+	    if (theDatabase.emailaddressHasBeenUsed(emailAddress)) {
+	        ViewAdminHome.alertEmailError.setContentText(
+	            "An invitation has already been issued to that email address.");
+	        ViewAdminHome.alertEmailError.showAndWait();
+	        return;
+	    }
 
-				ViewAdminHome.refreshUserList();
-				ViewAdminHome.label_NumberOfUsers.setText("Number of users: " + theDatabase.getNumberOfUsers());
-			} else {
-				Alert errorAlert = new Alert(AlertType.ERROR);
-				errorAlert.setTitle("Database Error");
-				errorAlert.setHeaderText(null);
-				errorAlert.setContentText("Failed to delete user account from the database.");
-				errorAlert.showAndWait();
-			}
-		
-		// Inform the user that the invitation has been sent and display the invitation code
-		String theSelectedRole = (String) ViewAdminHome.combobox_SelectRole.getValue();
+	    String theSelectedRole = (String) ViewAdminHome.combobox_SelectRole.getValue();
+	    String dbRoleKey = theSelectedRole;
+	    if ("Contributor".equals(theSelectedRole)) dbRoleKey = "Role1";
+	    else if ("Viewer".equals(theSelectedRole)) dbRoleKey = "Role2";
 
-		// Map functional role display names to underlying database role keys
-		String dbRoleKey = theSelectedRole;
-		if ("Contributor".equals(theSelectedRole)) {
-			dbRoleKey = "Role1";
-		} else if ("Viewer".equals(theSelectedRole)) {
-			dbRoleKey = "Role2";
-		}
+	    String invitationCode = theDatabase.generateInvitationCode(emailAddress, dbRoleKey);
+	    String msg = "Code: " + invitationCode + " for role " + theSelectedRole +
+	            " was sent to: " + emailAddress;
+	    System.out.println(msg);
+	    ViewAdminHome.alertEmailSent.setContentText(msg);
+	    ViewAdminHome.alertEmailSent.showAndWait();
 
-		String invitationCode = theDatabase.generateInvitationCode(emailAddress,
-				dbRoleKey);
-		String msg = "Code: " + invitationCode + " for role " + theSelectedRole + 
-				" was sent to: " + emailAddress;
-		System.out.println(msg);
-		ViewAdminHome.alertEmailSent.setContentText(msg);
-		ViewAdminHome.alertEmailSent.showAndWait();
-		
-		// Update the Admin Home pages status
-		ViewAdminHome.text_InvitationEmailAddress.setText("");
-		ViewAdminHome.label_NumberOfInvitations.setText("Number of outstanding invitations: " + 
-				theDatabase.getNumberOfInvitations());
+	    ViewAdminHome.text_InvitationEmailAddress.setText("");
+	    ViewAdminHome.label_NumberOfInvitations.setText("Number of outstanding invitations: " +
+	            theDatabase.getNumberOfInvitations());
 	}
 	
 	/**********
@@ -199,22 +197,6 @@ public class ControllerAdminHome {
 				alert.showAndWait();
 			}
 		}
-	}
-	
-	/**********
-	 * <p> 
-	 * 
-	 * Title: deleteUser () Method. </p>
-	 * 
-	 * <p> Description: Protected method that is currently a stub informing the user that
-	 * this function has not yet been implemented. </p>
-	 */
-	protected static void deleteUser() {
-		System.out.println("\n*** WARNING ***: Delete User Not Yet Implemented");
-		ViewAdminHome.alertNotImplemented.setTitle("*** WARNING ***");
-		ViewAdminHome.alertNotImplemented.setHeaderText("Delete User Issue");
-		ViewAdminHome.alertNotImplemented.setContentText("Delete User Not Yet Implemented");
-		ViewAdminHome.alertNotImplemented.showAndWait();
 	}
 	
 	// Helper class for TableView binding
@@ -330,6 +312,7 @@ public class ControllerAdminHome {
 			return true;
 
 		}
+		return false;
 	}
 
 	protected static void performLogout() {
