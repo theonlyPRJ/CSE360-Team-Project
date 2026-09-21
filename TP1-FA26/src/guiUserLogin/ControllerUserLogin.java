@@ -1,5 +1,9 @@
 package guiUserLogin;
 
+import java.util.Optional;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import database.Database;
 import entityClasses.User;
 import javafx.stage.Stage;
@@ -8,7 +12,7 @@ import javafx.stage.Stage;
  * <p> Title: ControllerUserLogin Class. </p>
  * 
  * <p> Description: The Java/FX-based User Login Page.  This class provides the controller
- * actions basic on the user's use of the JavaFX GUI widgets defined by the View class.
+ * actions basic on thße user's use of the JavaFX GUI widgets defined by the View class.
  * 
  * This controller determines if the log in is valid.  If so set up the link to the database, 
  * determines how many roles this user is authorized to play, and the calls one the of the array of
@@ -79,6 +83,50 @@ public class ControllerUserLogin {
     	}
 		// System.out.println("*** Username is valid");
 		
+		// Check for active OTP login authentication
+		if (theDatabase.validateOTPLogin(username, password)) {
+			// Prompt user to reset their password using input dialogs
+			TextInputDialog passDialog = new TextInputDialog();
+			passDialog.setTitle("Reset Password");
+			passDialog.setHeaderText("Logging in via OTP. You must set a new password.");
+			passDialog.setContentText("Enter New Password:");
+
+			Optional<String> passResult = passDialog.showAndWait();
+			if (passResult.isPresent() && !passResult.get().trim().isEmpty()) {
+				String newPass = passResult.get().trim();
+
+				TextInputDialog confirmDialog = new TextInputDialog();
+				confirmDialog.setTitle("Confirm Password");
+				confirmDialog.setHeaderText("Confirm your new password.");
+				confirmDialog.setContentText("Re-enter New Password:");
+
+				Optional<String> confirmResult = confirmDialog.showAndWait();
+				if (confirmResult.isPresent() && confirmResult.get().equals(newPass)) {
+					// Reset password in database and deactivate OTP
+					if (theDatabase.resetPasswordWithOTP(username, newPass)) {
+						Alert successAlert = new Alert(AlertType.INFORMATION);
+						successAlert.setTitle("Success");
+						successAlert.setHeaderText("Password Reset Complete");
+						successAlert.setContentText("Your password has been reset successfully. Please log in with your new password.");
+						successAlert.showAndWait();
+
+						// Clear inputs and reload login view
+						ViewUserLogin.text_Username.setText("");
+						ViewUserLogin.text_Password.setText("");
+						return;
+					}
+				} else {
+					Alert errAlert = new Alert(AlertType.ERROR);
+					errAlert.setTitle("Error");
+					errAlert.setHeaderText("Mismatch");
+					errAlert.setContentText("Passwords do not match. Password reset cancelled.");
+					errAlert.showAndWait();
+					return;
+				}
+			}
+			return;
+		}
+
 		// Check to see that the login password matches the account password
     	String actualPassword = theDatabase.getCurrentPassword();
     	

@@ -1,5 +1,10 @@
 package guiAdminHome;
 
+import java.util.Optional;
+import java.util.UUID;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.TextInputDialog;
 import database.Database;
 
 import javafx.scene.control.Alert;
@@ -50,86 +55,84 @@ public class ControllerAdminHome {
 	private static Database theDatabase = applicationMain.FoundationsMain.database;
 
 	protected static void deleteUser() {
-		String targetUser = "";
-		if (ViewAdminHome.combobox_SelectUser != null && ViewAdminHome.combobox_SelectUser.getValue() != null) {
-			targetUser = (String) ViewAdminHome.combobox_SelectUser.getValue();
-		}
+	    String targetUser = "";
+	    if (ViewAdminHome.combobox_SelectUser.getValue() != null) {
+	        targetUser = ViewAdminHome.combobox_SelectUser.getValue();
+	    }
 
-		if (targetUser.isEmpty() || targetUser.equals("<Select a User>")) {
-			Alert alert = new Alert(AlertType.WARNING);
-			alert.setTitle("Selection Error");
-			alert.setHeaderText(null);
-			alert.setContentText("Please select a valid user to delete.");
-			alert.showAndWait();
-			return;
-		}
+	    if (targetUser.isEmpty() || targetUser.equals("<Select a User>")) {
+	        Alert alert = new Alert(AlertType.WARNING);
+	        alert.setTitle("Selection Error");
+	        alert.setHeaderText(null);
+	        alert.setContentText("Please select a valid user to delete.");
+	        alert.showAndWait();
+	        return;
+	    }
 
-		// Admin cannot delete their own account
-		if (targetUser.equalsIgnoreCase(ViewAdminHome.theUser.getUserName())) {
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setTitle("Action Denied");
-			alert.setHeaderText(null);
-			alert.setContentText("An admin is not allowed to remove that admin's access.");
-			alert.showAndWait();
-			return;
-		}
+	    if (targetUser.equalsIgnoreCase(ViewAdminHome.theUser.getUserName())) {
+	        Alert alert = new Alert(AlertType.ERROR);
+	        alert.setTitle("Action Denied");
+	        alert.setHeaderText(null);
+	        alert.setContentText("An admin is not allowed to remove that admin's access.");
+	        alert.showAndWait();
+	        return;
+	    }
 
+	    Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
+	    confirmAlert.setTitle("Confirm Deletion");
+	    confirmAlert.setHeaderText(null);
+	    confirmAlert.setContentText("Are you sure?");
+	    ButtonType buttonYes = new ButtonType("Yes");
+	    ButtonType buttonNo = new ButtonType("No");
+	    confirmAlert.getButtonTypes().setAll(buttonYes, buttonNo);
 
-		// Exact required prompt: "Are you sure?"
-		Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
-		confirmAlert.setTitle("Confirm Deletion");
-		confirmAlert.setHeaderText(null);
-		confirmAlert.setContentText("Are you sure?");
+	    Optional<ButtonType> result = confirmAlert.showAndWait();
+	    if (result.isPresent() && result.get() == buttonYes) {
+	        if (theDatabase.deleteUser(targetUser)) {
+	            Alert infoAlert = new Alert(AlertType.INFORMATION);
+	            infoAlert.setTitle("Success");
+	            infoAlert.setHeaderText(null);
+	            infoAlert.setContentText("User account '" + targetUser + "' has been successfully deleted.");
+	            infoAlert.showAndWait();
 
-		ButtonType buttonYes = new ButtonType("Yes");
-		ButtonType buttonNo = new ButtonType("No");
-		confirmAlert.getButtonTypes().setAll(buttonYes, buttonNo);
+	            ViewAdminHome.refreshUserList();
+	            ViewAdminHome.label_NumberOfUsers.setText("Number of users: " + theDatabase.getNumberOfUsers());
+	        } else {
+	            Alert errorAlert = new Alert(AlertType.ERROR);
+	            errorAlert.setTitle("Database Error");
+	            errorAlert.setHeaderText(null);
+	            errorAlert.setContentText("Failed to delete user account from the database.");
+	            errorAlert.showAndWait();
+	        }
+	    }
+	}
 
-		Optional<ButtonType> result = confirmAlert.showAndWait();
+	protected static void performInvitation() {
+	    String emailAddress = ViewAdminHome.text_InvitationEmailAddress.getText();
+	    if (invalidEmailAddress(emailAddress)) return;
 
-		// Only execute on explicit Yes
-		if (result.isPresent() && result.get() == buttonYes) {
-			boolean success = theDatabase.deleteUser(targetUser);
-			if (success) {
-				Alert infoAlert = new Alert(AlertType.INFORMATION);
-				infoAlert.setTitle("Success");
-				infoAlert.setHeaderText(null);
-				infoAlert.setContentText("User account '" + targetUser + "' has been successfully deleted.");
-				infoAlert.showAndWait();
+	    if (theDatabase.emailaddressHasBeenUsed(emailAddress)) {
+	        ViewAdminHome.alertEmailError.setContentText(
+	            "An invitation has already been issued to that email address.");
+	        ViewAdminHome.alertEmailError.showAndWait();
+	        return;
+	    }
 
-				ViewAdminHome.refreshUserList();
-				ViewAdminHome.label_NumberOfUsers.setText("Number of users: " + theDatabase.getNumberOfUsers());
-			} else {
-				Alert errorAlert = new Alert(AlertType.ERROR);
-				errorAlert.setTitle("Database Error");
-				errorAlert.setHeaderText(null);
-				errorAlert.setContentText("Failed to delete user account from the database.");
-				errorAlert.showAndWait();
-			}
-		
-		// Inform the user that the invitation has been sent and display the invitation code
-		String theSelectedRole = (String) ViewAdminHome.combobox_SelectRole.getValue();
+	    String theSelectedRole = (String) ViewAdminHome.combobox_SelectRole.getValue();
+	    String dbRoleKey = theSelectedRole;
+	    if ("Contributor".equals(theSelectedRole)) dbRoleKey = "Role1";
+	    else if ("Viewer".equals(theSelectedRole)) dbRoleKey = "Role2";
 
-		// Map functional role display names to underlying database role keys
-		String dbRoleKey = theSelectedRole;
-		if ("Contributor".equals(theSelectedRole)) {
-			dbRoleKey = "Role1";
-		} else if ("Viewer".equals(theSelectedRole)) {
-			dbRoleKey = "Role2";
-		}
+	    String invitationCode = theDatabase.generateInvitationCode(emailAddress, dbRoleKey);
+	    String msg = "Code: " + invitationCode + " for role " + theSelectedRole +
+	            " was sent to: " + emailAddress;
+	    System.out.println(msg);
+	    ViewAdminHome.alertEmailSent.setContentText(msg);
+	    ViewAdminHome.alertEmailSent.showAndWait();
 
-		String invitationCode = theDatabase.generateInvitationCode(emailAddress,
-				dbRoleKey);
-		String msg = "Code: " + invitationCode + " for role " + theSelectedRole + 
-				" was sent to: " + emailAddress;
-		System.out.println(msg);
-		ViewAdminHome.alertEmailSent.setContentText(msg);
-		ViewAdminHome.alertEmailSent.showAndWait();
-		
-		// Update the Admin Home pages status
-		ViewAdminHome.text_InvitationEmailAddress.setText("");
-		ViewAdminHome.label_NumberOfInvitations.setText("Number of outstanding invitations: " + 
-				theDatabase.getNumberOfInvitations());
+	    ViewAdminHome.text_InvitationEmailAddress.setText("");
+	    ViewAdminHome.label_NumberOfInvitations.setText("Number of outstanding invitations: " +
+	            theDatabase.getNumberOfInvitations());
 	}
 	
 	/**********
@@ -153,31 +156,47 @@ public class ControllerAdminHome {
 	 * 
 	 * Title: setOnetimePassword () Method. </p>
 	 * 
-	 * <p> Description: Protected method that is currently a stub informing the user that
-	 * this function has not yet been implemented. </p>
+	 * <p> Description: Generates a temporary One-Time Password for a selected target username. </p>
 	 */
 	protected static void setOnetimePassword () {
-		System.out.println("\n*** WARNING ***: One-Time Password Not Yet Implemented");
-		ViewAdminHome.alertNotImplemented.setTitle("*** WARNING ***");
-		ViewAdminHome.alertNotImplemented.setHeaderText("One-Time Password Issue");
-		ViewAdminHome.alertNotImplemented.setContentText("One-Time Password Not Yet Implemented");
-		ViewAdminHome.alertNotImplemented.showAndWait();
-	}
-	
-	/**********
-	 * <p> 
-	 * 
-	 * Title: deleteUser () Method. </p>
-	 * 
-	 * <p> Description: Protected method that is currently a stub informing the user that
-	 * this function has not yet been implemented. </p>
-	 */
-	protected static void deleteUser() {
-		System.out.println("\n*** WARNING ***: Delete User Not Yet Implemented");
-		ViewAdminHome.alertNotImplemented.setTitle("*** WARNING ***");
-		ViewAdminHome.alertNotImplemented.setHeaderText("Delete User Issue");
-		ViewAdminHome.alertNotImplemented.setContentText("Delete User Not Yet Implemented");
-		ViewAdminHome.alertNotImplemented.showAndWait();
+		// Prompt the admin to enter the target username
+		TextInputDialog dialog = new TextInputDialog();
+		dialog.setTitle("Set One-Time Password");
+		dialog.setHeaderText("Generate an OTP for a user account");
+		dialog.setContentText("Enter Target Username:");
+
+		Optional<String> result = dialog.showAndWait();
+		if (result.isPresent() && !result.get().trim().isEmpty()) {
+			String targetUsername = result.get().trim();
+
+			// Check if target user exists in database
+			if (!theDatabase.doesUserExist(targetUsername)) {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("Error");
+				alert.setHeaderText("User Not Found");
+				alert.setContentText("The username '" + targetUsername + "' does not exist.");
+				alert.showAndWait();
+				return;
+			}
+
+			// Generate a random 8-character OTP
+			String generatedOTP = UUID.randomUUID().toString().substring(0, 8);
+
+			// Store OTP and set active status in H2 DB
+			if (theDatabase.setOneTimePassword(targetUsername, generatedOTP)) {
+				Alert alert = new Alert(AlertType.INFORMATION);
+				alert.setTitle("OTP Generated");
+				alert.setHeaderText("One-Time Password Successfully Set");
+				alert.setContentText("One-Time Password for " + targetUsername + ": " + generatedOTP);
+				alert.showAndWait();
+			} else {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("Error");
+				alert.setHeaderText("Database Error");
+				alert.setContentText("Failed to set One-Time Password.");
+				alert.showAndWait();
+			}
+		}
 	}
 	
 	// Helper class for TableView binding
@@ -293,6 +312,7 @@ public class ControllerAdminHome {
 			return true;
 
 		}
+		return false;
 	}
 
 	protected static void performLogout() {
