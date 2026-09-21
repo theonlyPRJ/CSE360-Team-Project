@@ -7,6 +7,22 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextInputDialog;
 import database.Database;
 
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import java.util.Optional;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.Scene;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import entityClasses.User;
+import java.util.List;
+
 /*******
  * <p> Title: GUIAdminHomePage Class. </p>
  * 
@@ -30,55 +46,85 @@ import database.Database;
  * @version 1.01		2025-09-16 Update Javadoc documentation *  
  */
 
-public class ControllerAdminHome {
-	
-	/*-*******************************************************************************************
 
-	User Interface Actions for this page
-	
-	This controller is not a class that gets instantiated.  Rather, it is a collection of protected
-	static methods that can be called by the View (which is a singleton instantiated object) and 
-	the Model is often just a stub, or will be a singleton instantiated object.
-	
-	*/
-	
-	/**
-	 * Default constructor is not used.
-	 */
+public class ControllerAdminHome {
+
 	public ControllerAdminHome() {
 	}
-	
-	// Reference for the in-memory database so this package has access
+
 	private static Database theDatabase = applicationMain.FoundationsMain.database;
 
-	/**********
-	 * <p> 
-	 * 
-	 * Title: performInvitation () Method. </p>
-	 * 
-	 * <p> Description: Protected method to send an email inviting a potential user to establish
-	 * an account and a specific role. </p>
-	 */
-	protected static void performInvitation () {
-		// Verify that the email address is valid - If not alert the user and return
-		String emailAddress = ViewAdminHome.text_InvitationEmailAddress.getText();
-		if (invalidEmailAddress(emailAddress)) {
+	protected static void deleteUser() {
+		String targetUser = "";
+		if (ViewAdminHome.combobox_SelectUser != null && ViewAdminHome.combobox_SelectUser.getValue() != null) {
+			targetUser = (String) ViewAdminHome.combobox_SelectUser.getValue();
+		}
+
+		if (targetUser.isEmpty() || targetUser.equals("<Select a User>")) {
+			Alert alert = new Alert(AlertType.WARNING);
+			alert.setTitle("Selection Error");
+			alert.setHeaderText(null);
+			alert.setContentText("Please select a valid user to delete.");
+			alert.showAndWait();
 			return;
 		}
-		
-		// Check to ensure that we are not sending a second message with a new invitation code to
-		// the same email address.  
-		if (theDatabase.emailaddressHasBeenUsed(emailAddress)) {
-			ViewAdminHome.alertEmailError.setContentText(
-					"An invitation has already been sent to this email address.");
-			ViewAdminHome.alertEmailError.showAndWait();
+
+		// Admin cannot delete their own account
+		if (targetUser.equalsIgnoreCase(ViewAdminHome.theUser.getUserName())) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Action Denied");
+			alert.setHeaderText(null);
+			alert.setContentText("An admin is not allowed to remove that admin's access.");
+			alert.showAndWait();
 			return;
 		}
+
+
+		// Exact required prompt: "Are you sure?"
+		Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
+		confirmAlert.setTitle("Confirm Deletion");
+		confirmAlert.setHeaderText(null);
+		confirmAlert.setContentText("Are you sure?");
+
+		ButtonType buttonYes = new ButtonType("Yes");
+		ButtonType buttonNo = new ButtonType("No");
+		confirmAlert.getButtonTypes().setAll(buttonYes, buttonNo);
+
+		Optional<ButtonType> result = confirmAlert.showAndWait();
+
+		// Only execute on explicit Yes
+		if (result.isPresent() && result.get() == buttonYes) {
+			boolean success = theDatabase.deleteUser(targetUser);
+			if (success) {
+				Alert infoAlert = new Alert(AlertType.INFORMATION);
+				infoAlert.setTitle("Success");
+				infoAlert.setHeaderText(null);
+				infoAlert.setContentText("User account '" + targetUser + "' has been successfully deleted.");
+				infoAlert.showAndWait();
+
+				ViewAdminHome.refreshUserList();
+				ViewAdminHome.label_NumberOfUsers.setText("Number of users: " + theDatabase.getNumberOfUsers());
+			} else {
+				Alert errorAlert = new Alert(AlertType.ERROR);
+				errorAlert.setTitle("Database Error");
+				errorAlert.setHeaderText(null);
+				errorAlert.setContentText("Failed to delete user account from the database.");
+				errorAlert.showAndWait();
+			}
 		
 		// Inform the user that the invitation has been sent and display the invitation code
 		String theSelectedRole = (String) ViewAdminHome.combobox_SelectRole.getValue();
+
+		// Map functional role display names to underlying database role keys
+		String dbRoleKey = theSelectedRole;
+		if ("Contributor".equals(theSelectedRole)) {
+			dbRoleKey = "Role1";
+		} else if ("Viewer".equals(theSelectedRole)) {
+			dbRoleKey = "Role2";
+		}
+
 		String invitationCode = theDatabase.generateInvitationCode(emailAddress,
-				theSelectedRole);
+				dbRoleKey);
 		String msg = "Code: " + invitationCode + " for role " + theSelectedRole + 
 				" was sent to: " + emailAddress;
 		System.out.println(msg);
@@ -171,20 +217,81 @@ public class ControllerAdminHome {
 		ViewAdminHome.alertNotImplemented.showAndWait();
 	}
 	
+	// Helper class for TableView binding
+	public static class UserTableEntry {
+		private final String username;
+		private final String fullName;
+		private final String email;
+		private final String roles;
+		
+		public UserTableEntry(String username, String fullName, String email, String roles) {
+			this.username = username;
+			this.fullName = fullName;
+			this.email= email;
+			this.roles = roles;
+		}
+		
+		public String getUsername() {return username;}
+		public String getFullName() {return fullName;}
+		public String getEmail() {return email;}
+		public String getRoles() {return roles;}
+	}
+	
 	/**********
 	 * <p> 
 	 * 
 	 * Title: listUsers () Method. </p>
 	 * 
-	 * <p> Description: Protected method that is currently a stub informing the user that
-	 * this function has not yet been implemented. </p>
+	 * <p> Description: list user function 9-19-2026. </p>
 	 */
 	protected static void listUsers() {
-		System.out.println("\n*** WARNING ***: List Users Not Yet Implemented");
-		ViewAdminHome.alertNotImplemented.setTitle("*** WARNING ***");
-		ViewAdminHome.alertNotImplemented.setHeaderText("List User Issue");
-		ViewAdminHome.alertNotImplemented.setContentText("List Users Not Yet Implemented");
-		ViewAdminHome.alertNotImplemented.showAndWait();
+		// 1. Fetch user accounts from database
+	    List<User> userList = theDatabase.getAllUsers();
+	    ObservableList<User> data = FXCollections.observableArrayList(userList);
+
+	    // 2. Build JavaFX TableView
+	    TableView<UserTableEntry> table = new TableView<>();
+
+	    TableColumn<UserTableEntry, String> colUser = new TableColumn<>("Username");
+	    colUser.setCellValueFactory(new PropertyValueFactory<>("username"));
+
+	    TableColumn<UserTableEntry, String> colName = new TableColumn<>("Name");
+	    colName.setCellValueFactory(new PropertyValueFactory<>("fullName"));
+
+	    TableColumn<UserTableEntry, String> colEmail = new TableColumn<>("Email");
+	    colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+
+	    TableColumn<UserTableEntry, String> colRoles = new TableColumn<>("Assigned Roles");
+	    colRoles.setCellValueFactory(new PropertyValueFactory<>("roles"));
+
+	    table.getColumns().addAll(colUser, colName, colEmail, colRoles);
+
+	    // Populate rows
+	    ObservableList<UserTableEntry> tableEntries = FXCollections.observableArrayList();
+	    for (User u : userList) {
+	        String fullName = u.getFirstName() + " " + u.getLastName();
+	        
+	        // Build roles string
+	        StringBuilder roles = new StringBuilder();
+	        if (u.getAdminRole()) roles.append("Admin ");
+	        if (u.getNewRole1()) roles.append("Role1 ");
+	        if (u.getNewRole2()) roles.append("Role2 ");
+
+	        tableEntries.add(new UserTableEntry(u.getUserName(), fullName.trim(), u.getEmailAddress(), roles.toString().trim()));
+	    }
+	    table.setItems(tableEntries);
+
+	    // 3. Display in a Modal Window
+	    Stage dialog = new Stage();
+	    dialog.initModality(Modality.APPLICATION_MODAL);
+	    dialog.setTitle("All System User Accounts");
+
+	    VBox layout = new VBox(10);
+	    layout.getChildren().add(table);
+
+	    Scene scene = new Scene(layout, 600, 400);
+	    dialog.setScene(scene);
+	    dialog.showAndWait();
 	}
 	
 	/**********
@@ -215,35 +322,20 @@ public class ControllerAdminHome {
 	 * @param emailAddress	This String holds what is expected to be an email address
 	 */
 	protected static boolean invalidEmailAddress(String emailAddress) {
-		if (emailAddress.length() == 0) {
+		// Verify email is non-empty and enforces the universal 320-character maximum ceiling
+		if (emailAddress == null || emailAddress.length() == 0 || emailAddress.length() > 320) {
 			ViewAdminHome.alertEmailError.setContentText(
-					"Correct the email address and try again.");
+					"Correct the email address (1-320 characters) and try again.");
 			ViewAdminHome.alertEmailError.showAndWait();
 			return true;
+
 		}
-		return false;
 	}
-	
-	/**********
-	 * <p> 
-	 * 
-	 * Title: performLogout () Method. </p>
-	 * 
-	 * <p> Description: Protected method that logs this user out of the system and returns to the
-	 * login page for future use.</p>
-	 */
+
 	protected static void performLogout() {
 		guiUserLogin.ViewUserLogin.displayUserLogin(ViewAdminHome.theStage);
 	}
-	
-	/**********
-	 * <p> 
-	 * 
-	 * Title: performQuit () Method. </p>
-	 * 
-	 * <p> Description: Protected method that gracefully terminates the execution of the program.
-	 * </p>
-	 */
+
 	protected static void performQuit() {
 		System.exit(0);
 	}

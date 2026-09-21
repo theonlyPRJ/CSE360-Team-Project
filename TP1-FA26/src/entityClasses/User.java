@@ -97,6 +97,15 @@ public class User {
         this.role1 = role;
     }
 
+<<<<<<< HEAD
+=======
+    // Setter for Contributor role alias
+    public void setContributorRole(boolean role) {
+        this.role1 = role;
+    }
+
+    
+>>>>>>> origin/main
     /*****
      * <p> Method: void setRole2User(boolean role) </p>
      * 
@@ -124,6 +133,15 @@ public class User {
         this.isOtpActive = false; 
     }
 
+<<<<<<< HEAD
+=======
+    // Setter for Viewer role alias
+    public void setViewerRole(boolean role) {
+        this.role2 = role;
+    }
+
+    
+>>>>>>> origin/main
     /*****
      * Standard Field Getters and Setters
      *****/
@@ -149,11 +167,56 @@ public class User {
      * Role Getters & Helpers
      *****/
     public boolean getAdminRole() { return adminRole; }
+<<<<<<< HEAD
     public boolean getNewRole1() { return role1; }
     public boolean getContributorRole() { return role1; }
+=======
+
+    
+    /*****
+     * <p> Method: String getRole1() </p>
+     * 
+     * <p> Description: This getter returns the value of the role1 attribute. </p>
+     * 
+     * @return a String of "TRUE" or "FALSE" based on state of the attribute
+	 *
+     */
+    // Gets the current value of the role1 attribute.
+	public boolean getNewRole1() { return role1; }
+
+    // Getter for Contributor role alias
+    public boolean getContributorRole() { return role1; }
+
+    
+    /*****
+     * <p> Method: String getRole2() </p>
+     * 
+     * <p> Description: This getter returns the value of the role2 attribute. </p>
+     * 
+     * @return a String of "TRUE" or "FALSE" based on state of the attribute
+	 *
+     */
+    // Gets the current value of the role2 attribute.
+>>>>>>> origin/main
     public boolean getNewRole2() { return role2; }
     public boolean getViewerRole() { return role2; }
 
+<<<<<<< HEAD
+=======
+    // Getter for Viewer role alias
+    public boolean getViewerRole() { return role2; }
+
+        
+    /*****
+     * <p> Method: int getNumRoles() </p>
+     * 
+     * <p> Description: This getter returns the number of roles this user plays (0 - 5). </p>
+     * 
+     * @return a value 0 - 5 of the number of roles this user plays
+	 *
+     */
+    // Gets the current value of the Staff role attribute.
+>>>>>>> origin/main
     public int getNumRoles() {
         int numRoles = 0;
         if (adminRole) numRoles++;

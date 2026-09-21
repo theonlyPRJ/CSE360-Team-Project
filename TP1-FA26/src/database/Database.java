@@ -24,9 +24,15 @@ import entityClasses.User;
  * 
  * @author Lynn Robert Carter
  * 
+<<<<<<< HEAD
  * @version 2.00 2025-04-29 Updated and expanded from the version produce by Pravalika 
  * Mukkiri and Ishwarya Hidkimath Basavaraj
  * @version 2.01 2025-12-17 Minor updates for Spring 2026
+=======
+ * @version 2.00        2025-04-29 Updated and expanded from the version produce by Pravalika 
+ *                               Mukkiri and Ishwarya Hidkimath Basavaraj
+ * @version 2.01        2025-12-17 Minor updates for Spring 2026
+>>>>>>> origin/main
  */
 
 /*
@@ -37,6 +43,7 @@ import entityClasses.User;
 public class Database {
 
     // JDBC driver name and database URL 
+<<<<<<< HEAD
     static final String JDBC_DRIVER = "org.h2.Driver"; 
     static final String DB_URL = "jdbc:h2:~/FoundationDatabase"; 
 
@@ -47,6 +54,18 @@ public class Database {
     // Shared variables used within this class
     private Connection connection = null; // Singleton to access the database 
     private Statement statement = null; // The H2 Statement is used to construct queries
+=======
+    static final String JDBC_DRIVER = "org.h2.Driver";   
+    static final String DB_URL = "jdbc:h2:~/FoundationDatabase";  
+
+    //  Database credentials 
+    static final String USER = "sa"; 
+    static final String PASS = ""; 
+
+    //  Shared variables used within this class
+    private Connection connection = null;        // Singleton to access the database 
+    private Statement statement = null;            // The H2 Statement is used to construct queries
+>>>>>>> origin/main
     
     // These are the easily accessible attributes of the currently logged-in user
     // This is only useful for single user applications
@@ -67,6 +86,10 @@ public class Database {
      * <p> Description: The default constructor used to establish this singleton object.</p>
      * 
      */
+<<<<<<< HEAD
+=======
+    
+>>>>>>> origin/main
     public Database () {
         
     }
@@ -76,7 +99,11 @@ public class Database {
  * <p> Method: connectToDatabase </p>
  * 
  * <p> Description: Used to establish the in-memory instance of the H2 database from secondary
+<<<<<<< HEAD
  * storage.</p>
+=======
+ *         storage.</p>
+>>>>>>> origin/main
  *
  * @throws SQLException when the DriverManager is unable to establish a connection
  * 
@@ -89,7 +116,11 @@ public class Database {
             // You can use this command to clear the database and restart from fresh.
             //statement.execute("DROP ALL OBJECTS");
 
+<<<<<<< HEAD
             createTables(); // Create the necessary tables if they don't exist
+=======
+            createTables();  // Create the necessary tables if they don't exist
+>>>>>>> origin/main
         } catch (ClassNotFoundException e) {
             System.err.println("JDBC Driver not found: " + e.getMessage());
         }
@@ -103,7 +134,11 @@ public class Database {
  * 
  */
     private void createTables() throws SQLException {
+<<<<<<< HEAD
         // Create the user database with OTP fields from dev-otp
+=======
+        // Create the user database
+>>>>>>> origin/main
         String userTable = "CREATE TABLE IF NOT EXISTS userDB ("
                 + "id INT AUTO_INCREMENT PRIMARY KEY, "
                 + "userName VARCHAR(255) UNIQUE, "
@@ -115,6 +150,7 @@ public class Database {
                 + "emailAddress VARCHAR(255), "
                 + "adminRole BOOL DEFAULT FALSE, "
                 + "newRole1 BOOL DEFAULT FALSE, "
+<<<<<<< HEAD
                 + "newRole2 BOOL DEFAULT FALSE, "
                 + "oneTimePassword VARCHAR(255) DEFAULT NULL, "
                 + "isOtpActive BOOL DEFAULT FALSE)";
@@ -128,6 +164,11 @@ public class Database {
             // Columns already exist
         }
 
+=======
+                + "newRole2 BOOL DEFAULT FALSE)";
+        statement.execute(userTable);
+        
+>>>>>>> origin/main
         // Create the invitation codes table
         String invitationCodesTable = "CREATE TABLE IF NOT EXISTS InvitationCodes ("
                 + "code VARCHAR(10) PRIMARY KEY, "
@@ -152,7 +193,11 @@ public class Database {
             if (resultSet.next()) {
                 return resultSet.getInt("count") == 0;
             }
+<<<<<<< HEAD
         } catch (SQLException e) {
+=======
+        }  catch (SQLException e) {
+>>>>>>> origin/main
             return false;
         }
         return true;
@@ -204,7 +249,11 @@ public class Database {
             currentFirstName = user.getFirstName();
             pstmt.setString(3, currentFirstName);
             
+<<<<<<< HEAD
             currentMiddleName = user.getMiddleName(); 
+=======
+            currentMiddleName = user.getMiddleName();            
+>>>>>>> origin/main
             pstmt.setString(4, currentMiddleName);
             
             currentLastName = user.getLastName();
@@ -250,6 +299,10 @@ public class Database {
         } catch (SQLException e) {
             return null;
         }
+<<<<<<< HEAD
+=======
+//        System.out.println(userList);
+>>>>>>> origin/main
         return userList;
     }
 
@@ -257,7 +310,11 @@ public class Database {
  * <p> Method: boolean loginAdmin(User user) </p>
  * 
  * <p> Description: Check to see that a user with the specified username, password, and role
+<<<<<<< HEAD
  * is the same as a row in the table for the username, password, and role. </p>
+=======
+ *          is the same as a row in the table for the username, password, and role. </p>
+>>>>>>> origin/main
  * 
  * @param user specifies the specific user that should be logged in playing the Admin role.
  * 
@@ -272,8 +329,13 @@ public class Database {
             pstmt.setString(1, user.getUserName());
             pstmt.setString(2, user.getPassword());
             ResultSet rs = pstmt.executeQuery();
+<<<<<<< HEAD
             return rs.next(); // If a row is returned, rs.next() will return true 
         } catch (SQLException e) {
+=======
+            return rs.next();    // If a row is returned, rs.next() will return true        
+        } catch  (SQLException e) {
+>>>>>>> origin/main
             e.printStackTrace();
         }
         return false;
@@ -284,7 +346,11 @@ public class Database {
  * <p> Method: boolean loginRole1(User user) </p>
  * 
  * <p> Description: Check to see that a user with the specified username, password, and role
+<<<<<<< HEAD
  * is the same as a row in the table for the username, password, and role. </p>
+=======
+ *          is the same as a row in the table for the username, password, and role. </p>
+>>>>>>> origin/main
  * 
  * @param user specifies the specific user that should be logged in playing the Student/Contributor role.
  * 
@@ -300,7 +366,11 @@ public class Database {
             pstmt.setString(2, user.getPassword());
             ResultSet rs = pstmt.executeQuery();
             return rs.next();
+<<<<<<< HEAD
         } catch (SQLException e) {
+=======
+        } catch  (SQLException e) {
+>>>>>>> origin/main
                e.printStackTrace();
         }
         return false;
@@ -315,11 +385,19 @@ public class Database {
      * <p> Method: boolean loginRole2(User user) </p>
      * 
      * <p> Description: Check to see that a user with the specified username, password, and role
+<<<<<<< HEAD
      * is the same as a row in the table for the username, password, and role. </p>
      * 
      * @param user specifies the specific user that should be logged in playing the Reviewer/Viewer role.
      * 
      * @return true if the specified user has been logged in as Reviewer/Viewer else false.
+=======
+     *          is the same as a row in the table for the username, password, and role. </p>
+     * 
+     * @param user specifies the specific user that should be logged in playing the Reviewer role.
+     * 
+     * @return true if the specified user has been logged in as an Student else false.
+>>>>>>> origin/main
      * 
      */
     // Validates a reviewer user's login credentials.
@@ -331,7 +409,11 @@ public class Database {
             pstmt.setString(2, user.getPassword());
             ResultSet rs = pstmt.executeQuery();
             return rs.next();
+<<<<<<< HEAD
         } catch (SQLException e) {
+=======
+        } catch  (SQLException e) {
+>>>>>>> origin/main
                e.printStackTrace();
         }
         return false;
@@ -346,7 +428,11 @@ public class Database {
     /*******
      * <p> Method: boolean doesUserExist(User user) </p>
      * 
+<<<<<<< HEAD
      * <p> Description: Check to see that a user with the specified username is in the table. </p>
+=======
+     * <p> Description: Check to see that a user with the specified username is  in the table. </p>
+>>>>>>> origin/main
      * 
      * @param userName specifies the specific user that we want to determine if it is in the table.
      * 
@@ -381,7 +467,11 @@ public class Database {
      * 
      * @return the number of roles this user plays (0 - 5).
      * 
+<<<<<<< HEAD
      */ 
+=======
+     */    
+>>>>>>> origin/main
     // Get the number of roles that this user plays
     public int getNumberOfRoles (User user) {
         int numberOfRoles = 0;
@@ -389,14 +479,22 @@ public class Database {
         if (user.getNewRole1()) numberOfRoles++;
         if (user.getNewRole2()) numberOfRoles++;
         return numberOfRoles;
+<<<<<<< HEAD
     } 
+=======
+    }    
+>>>>>>> origin/main
 
     
     /*******
      * <p> Method: String generateInvitationCode(String emailAddress, String role) </p>
      * 
      * <p> Description: Given an email address and a roles, this method establishes and invitation
+<<<<<<< HEAD
      * code and adds a record to the InvitationCodes table. When the invitation code is used, the
+=======
+     * code and adds a record to the InvitationCodes table.  When the invitation code is used, the
+>>>>>>> origin/main
      * stored email address is used to establish the new user and the record is removed from the
      * table.</p>
      * 
@@ -428,7 +526,11 @@ public class Database {
      * <p> Method: int getNumberOfInvitations() </p>
      * 
      * <p> Description: Determine the number of outstanding invitations in the table.</p>
+<<<<<<< HEAD
      * 
+=======
+     *  
+>>>>>>> origin/main
      * @return the number of invitations in the table.
      * 
      */
@@ -440,7 +542,11 @@ public class Database {
             if (resultSet.next()) {
                 return resultSet.getInt("count");
             }
+<<<<<<< HEAD
         } catch (SQLException e) {
+=======
+        } catch  (SQLException e) {
+>>>>>>> origin/main
             e.printStackTrace();
         }
         return 0;
@@ -453,7 +559,11 @@ public class Database {
      * <p> Description: Determine if an email address has been user to establish a user.</p>
      * 
      * @param emailAddress is a string that identifies a user in the table
+<<<<<<< HEAD
      * 
+=======
+     *  
+>>>>>>> origin/main
      * @return true if the email address is in the table, else return false.
      * 
      */
@@ -463,6 +573,10 @@ public class Database {
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
             pstmt.setString(1, emailAddress);
             ResultSet rs = pstmt.executeQuery();
+<<<<<<< HEAD
+=======
+     //     System.out.println(rs);
+>>>>>>> origin/main
             if (rs.next()) {
                 // Mark the code as used
                 return rs.getInt("count")>0;
@@ -480,7 +594,11 @@ public class Database {
      * <p> Description: Get the role associated with an invitation code.</p>
      * 
      * @param code is the 6 character String invitation code
+<<<<<<< HEAD
      * 
+=======
+     *  
+>>>>>>> origin/main
      * @return the role for the code or an empty string.
      * 
      */
@@ -506,7 +624,11 @@ public class Database {
      * <p> Description: Get the email addressed associated with an invitation code.</p>
      * 
      * @param code is the 6 character String invitation code
+<<<<<<< HEAD
      * 
+=======
+     *  
+>>>>>>> origin/main
      * @return the email address for the code or an empty string.
      * 
      */
@@ -532,7 +654,11 @@ public class Database {
      * <p> Description: Remove an invitation record once it is used.</p>
      * 
      * @param code is the 6 character String invitation code
+<<<<<<< HEAD
      * 
+=======
+     *  
+>>>>>>> origin/main
      */
     // Remove an invitation using an email address once the user account has been setup
     public void removeInvitationAfterUse(String code) {
@@ -548,7 +674,11 @@ public class Database {
                     try (PreparedStatement pstmt2 = connection.prepareStatement(query)) {
                         pstmt2.setString(1, code);
                         pstmt2.executeUpdate();
+<<<<<<< HEAD
                     } catch (SQLException e) {
+=======
+                    }catch (SQLException e) {
+>>>>>>> origin/main
                         e.printStackTrace();
                     }
                 }
@@ -557,10 +687,16 @@ public class Database {
             e.printStackTrace();
         }
         return;
+<<<<<<< HEAD
     }
      
 
 /*******
+=======
+}
+
+    /*******
+>>>>>>> origin/main
      * <p> Method: String getFirstName(String username) </p>
      * 
      * <p> Description: Get the first name of a user given that user's username.</p>
@@ -568,7 +704,11 @@ public class Database {
      * @param username is the username of the user
      * 
      * @return the first name of a user given that user's username 
+<<<<<<< HEAD
      * 
+=======
+     *  
+>>>>>>> origin/main
      */
     // Get the First Name
     public String getFirstName(String username) {
@@ -591,12 +731,20 @@ public class Database {
      * <p> Method: void updateFirstName(String username, String firstName) </p>
      * 
      * <p> Description: Update the first name of a user given that user's username and the new
+<<<<<<< HEAD
      * first name.</p>
+=======
+     *        first name.</p>
+>>>>>>> origin/main
      * 
      * @param username is the username of the user
      * 
      * @param firstName is the new first name for the user
+<<<<<<< HEAD
      * 
+=======
+     *  
+>>>>>>> origin/main
      */
     // update the first name
     public void updateFirstName(String username, String firstName) {
@@ -611,6 +759,11 @@ public class Database {
         }
     }
 
+<<<<<<< HEAD
+=======
+
+    
+>>>>>>> origin/main
     /*******
      * <p> Method: String getMiddleName(String username) </p>
      * 
@@ -619,11 +772,19 @@ public class Database {
      * @param username is the username of the user
      * 
      * @return the middle name of a user given that user's username 
+<<<<<<< HEAD
      * 
      */
     // get the middle name
     public String getMiddleName(String username) {
         String query = "SELECT middleName FROM userDB WHERE userName = ?";
+=======
+     *  
+     */
+    // get the middle name
+    public String getMiddleName(String username) {
+        String query = "SELECT MiddleName FROM userDB WHERE userName = ?";
+>>>>>>> origin/main
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
@@ -637,16 +798,107 @@ public class Database {
         return null;
     }
 
+<<<<<<< HEAD
+=======
+    
+>>>>>>> origin/main
     /*******
      * <p> Method: void updateMiddleName(String username, String middleName) </p>
      * 
      * <p> Description: Update the middle name of a user given that user's username and the new
+<<<<<<< HEAD
      * middle name.</p>
      * 
      * @param username is the username of the user
      * 
      * @param middleName is the new middle name for the user
      * 
+=======
+     *          middle name.</p>
+     * 
+     * @param username is the username of the user
+     *  
+     * @param middleName is the new middle name for the user
+     *  
+     */
+    // update the middle name
+    public void updateMiddleName(String username, String middleName) {
+        String query = "UPDATE userDB SET middleName = ? WHERE username = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, middleName);
+            pstmt.setString(2, username);
+            pstmt.executeUpdate();
+            currentMiddleName = middleName;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+    /*******
+     * <p> Method: String getLastName(String username) </p>
+     * 
+     * <p> Description: Get the last name of a user given that user's username.</p>
+     * 
+     * @param username is the username of the user
+     * 
+     * @return the last name of a user given that user's username 
+     *  
+     */
+    // get he last name
+    public String getLastName(String username) {
+        String query = "SELECT LastName FROM userDB WHERE userName = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getString("lastName"); // Return last name role if user exists
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    
+    /*******
+     * <p> Method: void updateLastName(String username, String lastName) </p>
+     * 
+     * <p> Description: Update the middle name of a user given that user's username and the new
+     *          middle name.</p>
+     * 
+     * @param username is the username of the user
+     *  
+     * @param lastName is the new last name for the user
+     *  
+     */
+    // update the last name
+    public void updateLastName(String username, String lastName) {
+        String query = "UPDATE userDB SET lastName = ? WHERE username = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, lastName);
+            pstmt.setString(2, username);
+            pstmt.executeUpdate();
+            currentLastName = lastName;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+
+    /*******
+     * <p> Method: void updateMiddleName(String username, String middleName) </p>
+     * 
+     * <p> Description: Update the middle name of a user given that user's username and the new
+     *      middle name.</p>
+     * 
+     * @param username is the username of the user
+     *  
+     * @param middleName is the new middle name for the user
+     *  
+>>>>>>> origin/main
      */
     // update the middle name
     public void updateMiddleName(String username, String middleName) {
@@ -669,7 +921,11 @@ public class Database {
      * @param username is the username of the user
      * 
      * @return the last name of a user given that user's username 
+<<<<<<< HEAD
      * 
+=======
+     *  
+>>>>>>> origin/main
      */
     // get the last name
     public String getLastName(String username) {
@@ -691,12 +947,21 @@ public class Database {
      * <p> Method: void updateLastName(String username, String lastName) </p>
      * 
      * <p> Description: Update the last name of a user given that user's username and the new
+<<<<<<< HEAD
      * last name.</p>
      * 
      * @param username is the username of the user
      * 
      * @param lastName is the new last name for the user
      * 
+=======
+     *      last name.</p>
+     * 
+     * @param username is the username of the user
+     *  
+     * @param lastName is the new last name for the user
+     *  
+>>>>>>> origin/main
      */
     // update the last name
     public void updateLastName(String username, String lastName) {
@@ -719,7 +984,11 @@ public class Database {
      * @param username is the username of the user
      * 
      * @return the preferred first name of a user given that user's username 
+<<<<<<< HEAD
      * 
+=======
+     *  
+>>>>>>> origin/main
      */
     // get the preferred first name
     public String getPreferredFirstName(String username) {
@@ -729,7 +998,67 @@ public class Database {
             ResultSet rs = pstmt.executeQuery();
             
             if (rs.next()) {
+<<<<<<< HEAD
                 return rs.getString("preferredFirstName"); // Retained column lookup fix from main
+=======
+
+                return rs.getString("firstName"); // Return the preferred first name if user exists
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    
+    /*******
+     * <p> Method: void updatePreferredFirstName(String username, String preferredFirstName) </p>
+     * 
+     * <p> Description: Update the preferred first name of a user given that user's username and
+     *          the new preferred first name.</p>
+     * 
+     * @param username is the username of the user
+     *  
+     * @param preferredFirstName is the new preferred first name for the user
+     *  
+     */
+    // update the preferred first name of the user
+    public void updatePreferredFirstName(String username, String preferredFirstName) {
+        String query = "UPDATE userDB SET preferredFirstName = ? WHERE username = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, preferredFirstName);
+            pstmt.setString(2, username);
+            pstmt.executeUpdate();
+            currentPreferredFirstName = preferredFirstName;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+    /*******
+     * <p> Method: String getEmailAddress(String username) </p>
+     * 
+     * <p> Description: Get the email address of a user given that user's username.</p>
+     * 
+     * @param username is the username of the user
+     * 
+     * @return the email address of a user given that user's username 
+     *  
+     */
+    // get the email address
+    public String getEmailAddress(String username) {
+        String query = "SELECT emailAddress FROM userDB WHERE userName = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getString("emailAddress"); // Return the email address if user exists
+
+                return rs.getString("preferredFirstName"); // Fixed column name lookup
+>>>>>>> origin/main
             }
             
         } catch (SQLException e) {
@@ -738,16 +1067,254 @@ public class Database {
         return null;
     }
 
+<<<<<<< HEAD
+=======
+    
+    
+    /*******
+     * <p> Method: void updateEmailAddress(String username, String emailAddress) </p>
+     * 
+     * <p> Description: Update the email address name of a user given that user's username and
+     *          the new email address.</p>
+     * 
+     * @param username is the username of the user
+     *  
+     * @param emailAddress is the new preferred first name for the user
+     *  
+     */
+    // update the email address
+    public void updateEmailAddress(String username, String emailAddress) {
+        String query = "UPDATE userDB SET emailAddress = ? WHERE username = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, emailAddress);
+            pstmt.setString(2, username);
+            pstmt.executeUpdate();
+            currentEmailAddress = emailAddress;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+    /*******
+     * <p> Method: boolean getUserAccountDetails(String username) </p>
+     * 
+     * <p> Description: Get all the attributes of a user given that user's username.</p>
+     * 
+     * @param username is the username of the user
+     * 
+     * @return true of the get is successful, else false
+     *  
+     */
+    // get the attributes for a specified user
+    public boolean getUserAccountDetails(String username) {
+        String query = "SELECT * FROM userDB WHERE username = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();            
+            rs.next();
+            currentUsername = rs.getString(2);
+            currentPassword = rs.getString(3);
+            currentFirstName = rs.getString(4);
+            currentMiddleName = rs.getString(5);
+            currentLastName = rs.getString(6);
+            currentPreferredFirstName = rs.getString(7);
+            currentEmailAddress = rs.getString(8);
+            currentAdminRole = rs.getBoolean(9);
+            currentNewRole1 = rs.getBoolean(10);
+            currentNewRole2 = rs.getBoolean(11);
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+    
+    
+    /*******
+     * <p> Method: boolean updateUserRole(String username, String role, String value) </p>
+     * 
+     * <p> Description: Update a specified role for a specified user's and set and update all the
+     *          current user attributes.</p>
+     * 
+     * @param username is the username of the user
+     *  
+     * @param role is string that specifies the role to update
+     * 
+     * @param value is the string that specified TRUE or FALSE for the role
+     * 
+     * @return true if the update was successful, else false
+     *  
+     */
+    // Update a users role
+    public boolean updateUserRole(String username, String role, String value) {
+        if (role.compareTo("Admin") == 0) {
+            String query = "UPDATE userDB SET adminRole = ? WHERE username = ?";
+            try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+                pstmt.setString(1, value);
+                pstmt.setString(2, username);
+                pstmt.executeUpdate();
+                if (value.compareTo("true") == 0)
+                    currentAdminRole = true;
+                else
+                    currentAdminRole = false;
+                return true;
+            } catch (SQLException e) {
+                return false;
+            }
+        }
+        if (role.compareTo("Role1") == 0 || role.compareTo("Contributor") == 0) {
+            String query = "UPDATE userDB SET newRole1 = ? WHERE username = ?";
+            try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+                pstmt.setString(1, value);
+                pstmt.setString(2, username);
+                pstmt.executeUpdate();
+                if (value.compareTo("true") == 0)
+                    currentNewRole1 = true;
+                else
+                    currentNewRole1 = false;
+                return true;
+            } catch (SQLException e) {
+                return false;
+            }
+        }
+        if (role.compareTo("Role2") == 0 || role.compareTo("Viewer") == 0) {
+            String query = "UPDATE userDB SET newRole2 = ? WHERE username = ?";
+            try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+                pstmt.setString(1, value);
+                pstmt.setString(2, username);
+                pstmt.executeUpdate();
+                if (value.compareTo("true") == 0)
+                    currentNewRole2 = true;
+                else
+                    currentNewRole2 = false;
+                return true;
+            } catch (SQLException e) {
+                return false;
+            }
+        }
+        return false;
+    }
+    
+    
+    // Attribute getters for the current user
+    /*******
+     * <p> Method: String getCurrentUsername() </p>
+     * 
+     * <p> Description: Get the current user's username.</p>
+     * 
+     * @return the username value is returned
+     *  
+     */
+    public String getCurrentUsername() { return currentUsername;};
+
+    
+    /*******
+     * <p> Method: String getCurrentPassword() </p>
+     * 
+     * <p> Description: Get the current user's password.</p>
+     * 
+     * @return the password value is returned
+     *  
+     */
+    public String getCurrentPassword() { return currentPassword;};
+
+    
+    /*******
+     * <p> Method: String getCurrentFirstName() </p>
+     * 
+     * <p> Description: Get the current user's first name.</p>
+     * 
+     * @return the first name value is returned
+     *  
+     */
+    public String getCurrentFirstName() { return currentFirstName;};
+
+    
+    /*******
+     * <p> Method: String getCurrentMiddleName() </p>
+     * 
+     * <p> Description: Get the current user's middle name.</p>
+     * 
+     * @return the middle name value is returned
+     *  
+     */
+    public String getCurrentMiddleName() { return currentMiddleName;};
+
+    
+    /*******
+     * <p> Method: String getCurrentLastName() </p>
+     * 
+     * <p> Description: Get the current user's last name.</p>
+     * 
+     * @return the last name value is returned
+     *  
+     */
+    public String getCurrentLastName() { return currentLastName;};
+
+    
+    /*******
+     * <p> Method: String getCurrentPreferredFirstName( </p>
+     * 
+     * <p> Description: Get the current user's preferred first name.</p>
+     * 
+     * @return the preferred first name value is returned
+     *  
+     */
+    public String getCurrentPreferredFirstName() { return currentPreferredFirstName;};
+
+    
+    /*******
+     * <p> Method: String getCurrentEmailAddress() </p>
+     * 
+     * <p> Description: Get the current user's email address name.</p>
+     * 
+     * @return the email address value is returned
+     *  
+     */
+    public String getCurrentEmailAddress() { return currentEmailAddress;};
+
+    
+    /*******
+     * <p> Method: boolean getCurrentAdminRole() </p>
+     * 
+     * <p> Description: Get the current user's Admin role attribute.</p>
+     * 
+     * @return true if this user plays an Admin role, else false
+     *  
+     */
+    public boolean getCurrentAdminRole() { return currentAdminRole;};
+
+    
+    /*******
+     * <p> Method: boolean getCurrentNewRole1() </p>
+     * 
+     * <p> Description: Get the current user's Student role attribute.</p>
+     * 
+     * @return true if this user plays a Student role, else false
+     *  
+     */
+    public boolean getCurrentNewRole1() { return currentNewRole1;};
+
+>>>>>>> origin/main
     /*******
      * <p> Method: void updatePreferredFirstName(String username, String preferredFirstName) </p>
      * 
      * <p> Description: Update the preferred first name of a user given that user's username and
+<<<<<<< HEAD
      * the new preferred first name.</p>
      * 
      * @param username is the username of the user
      * 
      * @param preferredFirstName is the new preferred first name for the user
      * 
+=======
+     *      the new preferred first name.</p>
+     * 
+     * @param username is the username of the user
+     *  
+     * @param preferredFirstName is the new preferred first name for the user
+     *  
+>>>>>>> origin/main
      */
     // update the preferred first name of the user
     public void updatePreferredFirstName(String username, String preferredFirstName) {
@@ -770,7 +1337,11 @@ public class Database {
      * @param username is the username of the user
      * 
      * @return the email address of a user given that user's username 
+<<<<<<< HEAD
      * 
+=======
+     *  
+>>>>>>> origin/main
      */
     // get the email address
     public String getEmailAddress(String username) {
@@ -793,12 +1364,21 @@ public class Database {
      * <p> Method: void updateEmailAddress(String username, String emailAddress) </p>
      * 
      * <p> Description: Update the email address of a user given that user's username and
+<<<<<<< HEAD
      * the new email address.</p>
      * 
      * @param username is the username of the user
      * 
      * @param emailAddress is the new email address for the user
      * 
+=======
+     *      the new email address.</p>
+     * 
+     * @param username is the username of the user
+     *  
+     * @param emailAddress is the new email address for the user
+     *  
+>>>>>>> origin/main
      */
     // update the email address
     public void updateEmailAddress(String username, String emailAddress) {
@@ -814,6 +1394,7 @@ public class Database {
     }
 
     /*******
+<<<<<<< HEAD
      * <p> Method: void updatePassword(String username, String password) </p>
      * 
      * <p> Description: Update the password of a user given that user's username and
@@ -838,6 +1419,8 @@ public class Database {
     }
 
     /*******
+=======
+>>>>>>> origin/main
      * <p> Method: boolean getUserAccountDetails(String username) </p>
      * 
      * <p> Description: Get all the attributes of a user given that user's username.</p>
@@ -845,14 +1428,22 @@ public class Database {
      * @param username is the username of the user
      * 
      * @return true if the get is successful, else false
+<<<<<<< HEAD
      * 
+=======
+     *  
+>>>>>>> origin/main
      */
     // get the attributes for a specified user
     public boolean getUserAccountDetails(String username) {
         String query = "SELECT * FROM userDB WHERE username = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
             pstmt.setString(1, username);
+<<<<<<< HEAD
             ResultSet rs = pstmt.executeQuery(); 
+=======
+            ResultSet rs = pstmt.executeQuery();            
+>>>>>>> origin/main
             if (rs.next()) {
                 currentUsername = rs.getString(2);
                 currentPassword = rs.getString(3);
@@ -873,7 +1464,11 @@ public class Database {
     }
 
     /**
+<<<<<<< HEAD
      * Fetches all user accounts from userDB (from main).
+=======
+     * Fetches all user accounts from userDB.
+>>>>>>> origin/main
      * @return List of User objects containing username, name details, email, and assigned roles.
      */
     public List<User> getAllUsers() {
@@ -903,7 +1498,11 @@ public class Database {
     }
 
     /**
+<<<<<<< HEAD
      * Updates fields (FirstName, LastName, EmailAddress) for a given username (from main).
+=======
+     * Updates updated fields (FirstName, LastName, EmailAddress) for a given username.
+>>>>>>> origin/main
      */
     public boolean updateUserAccount(String username, String firstName, String lastName, String email) {
         String query = "UPDATE userDB SET firstName = ?, lastName = ?, emailAddress = ? WHERE userName = ?";
@@ -920,20 +1519,89 @@ public class Database {
         }
     }
 
+<<<<<<< HEAD
+=======
+    
+    /*******
+     * <p> Method: String getMiddleName(String username) </p>
+     * 
+     * <p> Description: Get the middle name of a user given that user's username.</p>
+     * 
+     * @param username is the username of the user
+     * 
+     * @return the middle name of a user given that user's username 
+     *  
+     */
+    // get the middle name
+    public String getMiddleName(String username) {
+        String query = "SELECT MiddleName FROM userDB WHERE userName = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getString("middleName"); // Return the middle name if user exists
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    
+    /*******
+     * <p> Method: String getLastName(String username) </p>
+     * 
+     * <p> Description: Get the last name of a user given that user's username.</p>
+     * 
+     * @param username is the username of the user
+     * 
+     * @return the last name of a user given that user's username 
+     *  
+     */
+    // get he last name
+    public String getLastName(String username) {
+        String query = "SELECT LastName FROM userDB WHERE userName = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getString("lastName"); // Return last name role if user exists
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+   
+    
+>>>>>>> origin/main
     /*******
      * <p> Method: boolean updateUserRole(String username, String role, String value) </p>
      * 
      * <p> Description: Update a specified role for a specified user's and set and update all the
+<<<<<<< HEAD
      * current user attributes.</p>
      * 
      * @param username is the username of the user
      * 
+=======
+     *          current user attributes.</p>
+     * 
+     * @param username is the username of the user
+     *  
+>>>>>>> origin/main
      * @param role is string that specifies the role to update
      * 
      * @param value is the string that specified TRUE or FALSE for the role
      * 
      * @return true if the update was successful, else false
+<<<<<<< HEAD
      * 
+=======
+     *  
+>>>>>>> origin/main
      */
     // Update a users role
     public boolean updateUserRole(String username, String role, String value) {
@@ -1000,6 +1668,7 @@ public class Database {
     public boolean getCurrentNewRole2() { return currentNewRole2; }
     public boolean getCurrentViewerRole() { return currentNewRole2; }
 
+<<<<<<< HEAD
     /*******
      * <p> Method: boolean setOneTimePassword(String username, String otp) </p>
      * 
@@ -1094,6 +1763,15 @@ public class Database {
      * <p> Description: Debugging method that dumps the database to the console.</p>
      * 
      * @throws SQLException if there is an issue accessing the database.
+=======
+    
+    /*******
+     * <p> Method: <p> Debugging method</p>
+     * 
+     * <p> Description: Debugging method that dumps the database of the console.</p>
+     * 
+     * @throws SQLException if there is an issues accessing the database.
+>>>>>>> origin/main
      * 
      */
     // Dumps the database.
@@ -1102,16 +1780,94 @@ public class Database {
         ResultSet resultSet = statement.executeQuery(query);
         ResultSetMetaData meta = resultSet.getMetaData();
         while (resultSet.next()) {
+<<<<<<< HEAD
             for (int i = 0; i < meta.getColumnCount(); i++) {
                 System.out.println(
                 meta.getColumnLabel(i + 1) + ": " +
                         resultSet.getString(i + 1));
             }
             System.out.println();
+=======
+        for (int i = 0; i < meta.getColumnCount(); i++) {
+        System.out.println(
+        meta.getColumnLabel(i + 1) + ": " +
+                resultSet.getString(i + 1));
+        }
+        System.out.println();
+>>>>>>> origin/main
         }
         resultSet.close();
     }
 
+<<<<<<< HEAD
+=======
+
+    // Getter for current user Contributor role alias
+    public boolean getCurrentContributorRole() { return currentNewRole1; };
+
+
+    
+    /*******
+     * <p> Method: boolean getCurrentNewRole2() </p>
+     * 
+     * <p> Description: Get the current user's Reviewer role attribute.</p>
+     * 
+     * @return true if this user plays a Reviewer role, else false
+     *  
+     */
+    public boolean getCurrentNewRole2() { return currentNewRole2;};
+
+    // Getter for current user Viewer role alias
+    public boolean getCurrentViewerRole() { return currentNewRole2; };
+
+    
+    /*******
+     * <p> Method: <p> Debugging method</p>
+     * 
+     * <p> Description: Debugging method that dumps the database of the console.</p>
+     * 
+     * @throws SQLException if there is an issues accessing the database.
+     * 
+     */
+    // Dumps the database.
+    public void dump() throws SQLException {
+        String query = "SELECT * FROM userDB";
+        ResultSet resultSet = statement.executeQuery(query);
+        ResultSetMetaData meta = resultSet.getMetaData();
+        while (resultSet.next()) {
+        for (int i = 0; i < meta.getColumnCount(); i++) {
+        System.out.println(
+        meta.getColumnLabel(i + 1) + ": " +
+                resultSet.getString(i + 1));
+        }
+        System.out.println();
+        }
+        resultSet.close();
+    }
+
+    /*******
+     * <p> Method: boolean deleteUser(String userName) </p>
+     * 
+     * <p> Description: Permanently removes a user record from userDB by username.</p>
+     * 
+     * @param userName The username of the user account to be deleted
+     * @return true if the record was successfully deleted, false otherwise
+     */
+    public boolean deleteUser(String userName) {
+        if (userName == null || userName.trim().isEmpty() || userName.startsWith("<Select")) {
+            return false;
+        }
+        String sql = "DELETE FROM userDB WHERE LOWER(userName) = LOWER(?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, userName.trim());
+            int affected = pstmt.executeUpdate();
+            return affected > 0;
+        } catch (SQLException e) {
+            System.err.println("*** ERROR *** Could not delete user: " + userName + " -> " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+>>>>>>> origin/main
     /*******
      * <p> Method: void closeConnection()</p>
      * 
