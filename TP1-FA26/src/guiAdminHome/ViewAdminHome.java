@@ -1,5 +1,6 @@
 package guiAdminHome;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javafx.collections.FXCollections;
@@ -35,7 +36,7 @@ public class ViewAdminHome {
 
 	// User Deletion Section
 	protected static Button button_DeleteUser = new Button("Delete a User");
-	protected static ComboBox<String> combobox_SelectUser = new ComboBox<String>();
+	public static ComboBox<String> combobox_SelectUser = new ComboBox<String>();
 
 	private static Line line_Separator3 = new Line(20, 525, width - 20, 525);
 
@@ -44,11 +45,11 @@ public class ViewAdminHome {
 	protected static Button button_Quit = new Button("Quit");
 
 	private static ViewAdminHome theView;
-	private static Database theDatabase = applicationMain.FoundationsMain.database;
+	protected static Database theDatabase = applicationMain.FoundationsMain.database;
 
-	protected static Stage theStage;
+	public static Stage theStage;
 	private static Pane theRootPane;
-	protected static User theUser;
+	public static User theUser;
 
 	private static Scene theAdminHomeScene;
 	private static final int theRole = 1;
@@ -57,14 +58,20 @@ public class ViewAdminHome {
 		theStage = ps;
 		theUser = user;
 
-		if (theView == null) theView = new ViewAdminHome();
+		if (theView == null) {
+			theView = new ViewAdminHome();
+		}
 
-		theDatabase.getUserAccountDetails(user.getUserName());
 		applicationMain.FoundationsMain.activeHomePage = theRole;
+
+		// Update UI elements for the logged-in user
+		if (theUser != null) {
+			label_UserDetails.setText("User: " + theUser.getUserName());
+		}
 
 		// Refresh user dropdown and count
 		refreshUserList();
-		label_NumberOfUsers.setText("Number of users: " + theDatabase.getNumberOfUsers());
+		updateUserCount();
 
 		theStage.setTitle("CSE 360 Foundation Code: Admin Home Page");
 		theStage.setScene(theAdminHomeScene);
@@ -79,6 +86,10 @@ public class ViewAdminHome {
 		}
 	}
 
+	public static void updateUserCount() {
+		label_NumberOfUsers.setText("Number of users: " + theDatabase.getNumberOfUsers());
+	}
+
 	private ViewAdminHome() {
 		theRootPane = new Pane();
 		theAdminHomeScene = new Scene(theRootPane, width, height);
@@ -87,34 +98,32 @@ public class ViewAdminHome {
 		label_PageTitle.setText("Admin Home Page");
 		setupLabelUI(label_PageTitle, "Arial", 28, width, Pos.CENTER, 0, 5);
 
-		label_UserDetails.setText("User: " + theUser.getUserName());
 		setupLabelUI(label_UserDetails, "Arial", 20, width, Pos.BASELINE_LEFT, 20, 55);
 
 		setupButtonUI(button_UpdateThisUser, "Dialog", 18, 170, Pos.CENTER, 610, 45);
-		button_UpdateThisUser.setOnAction((_) -> {
+		button_UpdateThisUser.setOnAction(event -> {
 			ViewUserUpdate.displayUserUpdate(theStage, theUser);
 		});
 
 		// Area 2: Status
-		setupLabelUI(label_NumberOfUsers, "Arial", 20, 200, Pos.BASELINE_LEFT, 20, 115);
-		label_NumberOfUsers.setText("Number of users: " + theDatabase.getNumberOfUsers());
+		setupLabelUI(label_NumberOfUsers, "Arial", 20, 250, Pos.BASELINE_LEFT, 20, 115);
 
 		// Area 3: Delete Action
-		setupButtonUI(button_DeleteUser, "Dialog", 16, 250, Pos.CENTER, 20, 200);
-		button_DeleteUser.setOnAction((_) -> {
+		setupButtonUI(button_DeleteUser, "Dialog", 16, 200, Pos.CENTER, 20, 200);
+		button_DeleteUser.setOnAction(event -> {
 			ControllerAdminHome.deleteUser();
 		});
 
-		setupComboBoxUI(combobox_SelectUser, "Dialog", 16, 220, 290, 200);
+		setupComboBoxUI(combobox_SelectUser, "Dialog", 14, 220, 240, 200);
 
 		// Area 4: Logout / Quit
-		setupButtonUI(button_Logout, "Dialog", 18, 250, Pos.CENTER, 20, 540);
-		button_Logout.setOnAction((_) -> {
+		setupButtonUI(button_Logout, "Dialog", 18, 200, Pos.CENTER, 20, 540);
+		button_Logout.setOnAction(event -> {
 			ControllerAdminHome.performLogout();
 		});
 
-		setupButtonUI(button_Quit, "Dialog", 18, 250, Pos.CENTER, 300, 540);
-		button_Quit.setOnAction((_) -> {
+		setupButtonUI(button_Quit, "Dialog", 18, 200, Pos.CENTER, 250, 540);
+		button_Quit.setOnAction(event -> {
 			ControllerAdminHome.performQuit();
 		});
 
