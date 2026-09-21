@@ -1,7 +1,8 @@
 package guiUserUpdate;
 
 import java.util.Optional;
-
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import database.Database;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -256,18 +257,27 @@ public class ViewUserUpdate {
         setupLabelUI(label_CurrentPassword, "Arial", 18, 260, Pos.BASELINE_LEFT, 200, 150);
         setupButtonUI(button_UpdatePassword, "Dialog", 18, 275, Pos.CENTER, 500, 143);
         
-        // First Name
+        // Updated First Name action handler - 9-19-2026
         setupLabelUI(label_FirstName, "Arial", 18, 190, Pos.BASELINE_RIGHT, 5, 200);
         setupLabelUI(label_CurrentFirstName, "Arial", 18, 260, Pos.BASELINE_LEFT, 200, 200);
         setupButtonUI(button_UpdateFirstName, "Dialog", 18, 275, Pos.CENTER, 500, 193);
-        button_UpdateFirstName.setOnAction((event) -> {result = dialogUpdateFirstName.showAndWait();
-        	result.ifPresent(name -> theDatabase.updateFirstName(theUser.getUserName(), result.get()));
-        	theDatabase.getUserAccountDetails(theUser.getUserName());
-         	String newName = theDatabase.getCurrentFirstName();
-           	theUser.setFirstName(newName);
-        	if (newName == null || newName.length() < 1)label_CurrentFirstName.setText("<none>");
-        	else label_CurrentFirstName.setText(newName);
-         	});
+        button_UpdateFirstName.setOnAction((event) -> {
+        	result = dialogUpdateFirstName.showAndWait();
+            if (result.isPresent()) {
+                String input = result.get().trim();
+                if (!UserValidation.isValidName(input)) {
+                    showValidationError("Invalid First Name", 
+                        "First Name must be 1–32 characters long and contain only letters, spaces, or hyphens.");
+                    return;
+                }
+                theDatabase.updateFirstName(theUser.getUserName(), input);
+                theDatabase.getUserAccountDetails(theUser.getUserName());
+                String newName = theDatabase.getCurrentFirstName();
+                theUser.setFirstName(newName);
+                if (newName == null || newName.length() < 1) label_CurrentFirstName.setText("<none>");
+                else label_CurrentFirstName.setText(newName);
+            }
+        });
                
         // Middle Name
         setupLabelUI(label_MiddleName, "Arial", 18, 190, Pos.BASELINE_RIGHT, 5, 250);
@@ -282,18 +292,27 @@ public class ViewUserUpdate {
         	else label_CurrentMiddleName.setText(newName);
     		});
         
-        // Last Name
+        // Updated Last Name action handler - 9-19-2026
         setupLabelUI(label_LastName, "Arial", 18, 190, Pos.BASELINE_RIGHT, 5, 300);
         setupLabelUI(label_CurrentLastName, "Arial", 18, 260, Pos.BASELINE_LEFT, 200, 300);
         setupButtonUI(button_UpdateLastName, "Dialog", 18, 275, Pos.CENTER, 500, 293);
-        button_UpdateLastName.setOnAction((event) -> {result = dialogUpdateLastName.showAndWait();
-    		result.ifPresent(name -> theDatabase.updateLastName(theUser.getUserName(), result.get()));
-    		theDatabase.getUserAccountDetails(theUser.getUserName());
-    		String newName = theDatabase.getCurrentLastName();
-           	theUser.setLastName(newName);
-      	if (newName == null || newName.length() < 1)label_CurrentLastName.setText("<none>");
-        	else label_CurrentLastName.setText(newName);
-    		});
+        button_UpdateLastName.setOnAction((event) -> {
+            result = dialogUpdateLastName.showAndWait();
+            if (result.isPresent()) {
+                String input = result.get().trim();
+                if (!UserValidation.isValidName(input)) {
+                    showValidationError("Invalid Last Name", 
+                        "Last Name must be 1–32 characters long and contain only letters, spaces, or hyphens.");
+                    return;
+                }
+                theDatabase.updateLastName(theUser.getUserName(), input);
+                theDatabase.getUserAccountDetails(theUser.getUserName());
+                String newName = theDatabase.getCurrentLastName();
+                theUser.setLastName(newName);
+                if (newName == null || newName.length() < 1) label_CurrentLastName.setText("<none>");
+                else label_CurrentLastName.setText(newName);
+            }
+        });
         
         // Preferred First Name
         setupLabelUI(label_PreferredFirstName, "Arial", 18, 190, Pos.BASELINE_RIGHT, 
@@ -312,18 +331,28 @@ public class ViewUserUpdate {
         	else label_CurrentPreferredFirstName.setText(newName);
      		});
         
-        // Email Address
+        // Updated Email Address action handler - 9-19-2026
         setupLabelUI(label_EmailAddress, "Arial", 18, 190, Pos.BASELINE_RIGHT, 5, 400);
         setupLabelUI(label_CurrentEmailAddress, "Arial", 18, 260, Pos.BASELINE_LEFT, 200, 400);
         setupButtonUI(button_UpdateEmailAddress, "Dialog", 18, 275, Pos.CENTER, 500, 393);
-        button_UpdateEmailAddress.setOnAction((event) -> {result = dialogUpdateEmailAddresss.showAndWait();
-    		result.ifPresent(email -> theDatabase.updateEmailAddress(theUser.getUserName(), result.get()));
-    		theDatabase.getUserAccountDetails(theUser.getUserName());
-    		String newEmail = theDatabase.getCurrentEmailAddress();
-           	theUser.setEmailAddress(newEmail);
-        	if (newEmail == null || newEmail.length() < 1)label_CurrentEmailAddress.setText("<none>");
-        	else label_CurrentEmailAddress.setText(newEmail);
- 			});
+        button_UpdateEmailAddress.setOnAction((event) -> {
+            result = dialogUpdateEmailAddresss.showAndWait();
+            if (result.isPresent()) {
+                String input = result.get().trim();
+                // Step 4 Validation
+                if (!UserValidation.isValidEmail(input)) {
+                    showValidationError("Invalid Email Address", 
+                        "Email address must be 6–320 characters long and follow standard format (e.g. name@domain.com).");
+                    return;
+                }
+                theDatabase.updateEmailAddress(theUser.getUserName(), input);
+                theDatabase.getUserAccountDetails(theUser.getUserName());
+                String newEmail = theDatabase.getCurrentEmailAddress();
+                theUser.setEmailAddress(newEmail);
+                if (newEmail == null || newEmail.length() < 1) label_CurrentEmailAddress.setText("<none>");
+                else label_CurrentEmailAddress.setText(newEmail);
+            }
+        });
         
         // Set up the button to proceed to this user's home page
         setupButtonUI(button_ProceedToUserHomePage, "Dialog", 18, 300, 
@@ -364,6 +393,16 @@ public class ViewUserUpdate {
 	 * @param x		The location from the left edge (x axis)
 	 * @param y		The location from the top (y axis)
 	 */
+
+	// Added helper method for displaying error dialog
+	private static void showValidationError(String title, String message) {
+	    Alert alert = new Alert(AlertType.ERROR);
+	    alert.setTitle(title);
+	    alert.setHeaderText("Validation Error");
+	    alert.setContentText(message);
+	    alert.showAndWait();
+	}
+	
 	private static void setupLabelUI(Label l, String ff, double f, double w, Pos p, double x, double y){
 		l.setFont(Font.font(ff, f));
 		l.setMinWidth(w);
