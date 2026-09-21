@@ -550,9 +550,8 @@ public class Database {
             e.printStackTrace();
         }
         return;
-    }
-    
-    
+}
+
     /*******
      * <p> Method: String getFirstName(String username) </p>
      * 
@@ -579,7 +578,6 @@ public class Database {
         }
         return null;
     }
-    
 
     /*******
      * <p> Method: void updateFirstName(String username, String firstName) </p>
@@ -604,6 +602,7 @@ public class Database {
             e.printStackTrace();
         }
     }
+
 
     
     /*******
@@ -710,6 +709,81 @@ public class Database {
     }
     
     
+
+    /*******
+     * <p> Method: void updateMiddleName(String username, String middleName) </p>
+     * 
+     * <p> Description: Update the middle name of a user given that user's username and the new
+     *      middle name.</p>
+     * 
+     * @param username is the username of the user
+     *  
+     * @param middleName is the new middle name for the user
+     *  
+     */
+    // update the middle name
+    public void updateMiddleName(String username, String middleName) {
+        String query = "UPDATE userDB SET middleName = ? WHERE username = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, middleName);
+            pstmt.setString(2, username);
+            pstmt.executeUpdate();
+            currentMiddleName = middleName;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*******
+     * <p> Method: String getLastName(String username) </p>
+     * 
+     * <p> Description: Get the last name of a user given that user's username.</p>
+     * 
+     * @param username is the username of the user
+     * 
+     * @return the last name of a user given that user's username 
+     *  
+     */
+    // get the last name
+    public String getLastName(String username) {
+        String query = "SELECT lastName FROM userDB WHERE userName = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getString("lastName");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /*******
+     * <p> Method: void updateLastName(String username, String lastName) </p>
+     * 
+     * <p> Description: Update the last name of a user given that user's username and the new
+     *      last name.</p>
+     * 
+     * @param username is the username of the user
+     *  
+     * @param lastName is the new last name for the user
+     *  
+     */
+    // update the last name
+    public void updateLastName(String username, String lastName) {
+        String query = "UPDATE userDB SET lastName = ? WHERE username = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, lastName);
+            pstmt.setString(2, username);
+            pstmt.executeUpdate();
+            currentLastName = lastName;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     /*******
      * <p> Method: String getPreferredFirstName(String username) </p>
      * 
@@ -728,6 +802,7 @@ public class Database {
             ResultSet rs = pstmt.executeQuery();
             
             if (rs.next()) {
+
                 return rs.getString("firstName"); // Return the preferred first name if user exists
             }
             
@@ -782,6 +857,8 @@ public class Database {
             
             if (rs.next()) {
                 return rs.getString("emailAddress"); // Return the email address if user exists
+
+                return rs.getString("preferredFirstName"); // Fixed column name lookup
             }
             
         } catch (SQLException e) {
@@ -789,6 +866,7 @@ public class Database {
         }
         return null;
     }
+
     
     
     /*******
@@ -1015,8 +1093,328 @@ public class Database {
      */
     public boolean getCurrentNewRole1() { return currentNewRole1;};
 
+    /*******
+     * <p> Method: void updatePreferredFirstName(String username, String preferredFirstName) </p>
+     * 
+     * <p> Description: Update the preferred first name of a user given that user's username and
+     *      the new preferred first name.</p>
+     * 
+     * @param username is the username of the user
+     *  
+     * @param preferredFirstName is the new preferred first name for the user
+     *  
+     */
+    // update the preferred first name of the user
+    public void updatePreferredFirstName(String username, String preferredFirstName) {
+        String query = "UPDATE userDB SET preferredFirstName = ? WHERE username = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, preferredFirstName);
+            pstmt.setString(2, username);
+            pstmt.executeUpdate();
+            currentPreferredFirstName = preferredFirstName;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*******
+     * <p> Method: String getEmailAddress(String username) </p>
+     * 
+     * <p> Description: Get the email address of a user given that user's username.</p>
+     * 
+     * @param username is the username of the user
+     * 
+     * @return the email address of a user given that user's username 
+     *  
+     */
+    // get the email address
+    public String getEmailAddress(String username) {
+        String query = "SELECT emailAddress FROM userDB WHERE userName = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getString("emailAddress");
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /*******
+     * <p> Method: void updateEmailAddress(String username, String emailAddress) </p>
+     * 
+     * <p> Description: Update the email address of a user given that user's username and
+     *      the new email address.</p>
+     * 
+     * @param username is the username of the user
+     *  
+     * @param emailAddress is the new email address for the user
+     *  
+     */
+    // update the email address
+    public void updateEmailAddress(String username, String emailAddress) {
+        String query = "UPDATE userDB SET emailAddress = ? WHERE username = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, emailAddress);
+            pstmt.setString(2, username);
+            pstmt.executeUpdate();
+            currentEmailAddress = emailAddress;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*******
+     * <p> Method: boolean getUserAccountDetails(String username) </p>
+     * 
+     * <p> Description: Get all the attributes of a user given that user's username.</p>
+     * 
+     * @param username is the username of the user
+     * 
+     * @return true if the get is successful, else false
+     *  
+     */
+    // get the attributes for a specified user
+    public boolean getUserAccountDetails(String username) {
+        String query = "SELECT * FROM userDB WHERE username = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();            
+            if (rs.next()) {
+                currentUsername = rs.getString(2);
+                currentPassword = rs.getString(3);
+                currentFirstName = rs.getString(4);
+                currentMiddleName = rs.getString(5);
+                currentLastName = rs.getString(6);
+                currentPreferredFirstName = rs.getString(7);
+                currentEmailAddress = rs.getString(8);
+                currentAdminRole = rs.getBoolean(9);
+                currentNewRole1 = rs.getBoolean(10);
+                currentNewRole2 = rs.getBoolean(11);
+                return true;
+            }
+            return false;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Fetches all user accounts from userDB.
+     * @return List of User objects containing username, name details, email, and assigned roles.
+     */
+    public List<User> getAllUsers() {
+        List<User> users = new ArrayList<>();
+        String query = "SELECT * FROM userDB";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                User user = new User(
+                    rs.getString("username"),
+                    rs.getString("password"),
+                    rs.getString("firstName"),
+                    rs.getString("middleName"),
+                    rs.getString("lastName"),
+                    rs.getString("preferredFirstName"),
+                    rs.getString("emailAddress"),
+                    rs.getBoolean("adminRole"),
+                    rs.getBoolean("newRole1"),
+                    rs.getBoolean("newRole2")
+                );
+                users.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    /**
+     * Updates updated fields (FirstName, LastName, EmailAddress) for a given username.
+     */
+    public boolean updateUserAccount(String username, String firstName, String lastName, String email) {
+        String query = "UPDATE userDB SET firstName = ?, lastName = ?, emailAddress = ? WHERE userName = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, firstName);
+            pstmt.setString(2, lastName);
+            pstmt.setString(3, email);
+            pstmt.setString(4, username);
+            pstmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    
+    /*******
+     * <p> Method: String getMiddleName(String username) </p>
+     * 
+     * <p> Description: Get the middle name of a user given that user's username.</p>
+     * 
+     * @param username is the username of the user
+     * 
+     * @return the middle name of a user given that user's username 
+     *  
+     */
+    // get the middle name
+    public String getMiddleName(String username) {
+        String query = "SELECT MiddleName FROM userDB WHERE userName = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getString("middleName"); // Return the middle name if user exists
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    
+    /*******
+     * <p> Method: String getLastName(String username) </p>
+     * 
+     * <p> Description: Get the last name of a user given that user's username.</p>
+     * 
+     * @param username is the username of the user
+     * 
+     * @return the last name of a user given that user's username 
+     *  
+     */
+    // get he last name
+    public String getLastName(String username) {
+        String query = "SELECT LastName FROM userDB WHERE userName = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getString("lastName"); // Return last name role if user exists
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+   
+    
+    /*******
+     * <p> Method: boolean updateUserRole(String username, String role, String value) </p>
+     * 
+     * <p> Description: Update a specified role for a specified user's and set and update all the
+     *          current user attributes.</p>
+     * 
+     * @param username is the username of the user
+     *  
+     * @param role is string that specifies the role to update
+     * 
+     * @param value is the string that specified TRUE or FALSE for the role
+     * 
+     * @return true if the update was successful, else false
+     *  
+     */
+    // Update a users role
+    public boolean updateUserRole(String username, String role, String value) {
+        if (role.compareTo("Admin") == 0) {
+            String query = "UPDATE userDB SET adminRole = ? WHERE username = ?";
+            try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+                pstmt.setString(1, value);
+                pstmt.setString(2, username);
+                pstmt.executeUpdate();
+                if (value.compareTo("true") == 0)
+                    currentAdminRole = true;
+                else
+                    currentAdminRole = false;
+                return true;
+            } catch (SQLException e) {
+                return false;
+            }
+        }
+        if (role.compareTo("Role1") == 0 || role.compareTo("Contributor") == 0) {
+            String query = "UPDATE userDB SET newRole1 = ? WHERE username = ?";
+            try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+                pstmt.setString(1, value);
+                pstmt.setString(2, username);
+                pstmt.executeUpdate();
+                if (value.compareTo("true") == 0)
+                    currentNewRole1 = true;
+                else
+                    currentNewRole1 = false;
+                return true;
+            } catch (SQLException e) {
+                return false;
+            }
+        }
+        if (role.compareTo("Role2") == 0 || role.compareTo("Viewer") == 0) {
+            String query = "UPDATE userDB SET newRole2 = ? WHERE username = ?";
+            try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+                pstmt.setString(1, value);
+                pstmt.setString(2, username);
+                pstmt.executeUpdate();
+                if (value.compareTo("true") == 0)
+                    currentNewRole2 = true;
+                else
+                    currentNewRole2 = false;
+                return true;
+            } catch (SQLException e) {
+                return false;
+            }
+        }
+        return false;
+    }
+    
+    
+// Attribute getters for current user session
+    public String getCurrentUsername() { return currentUsername; }
+    public String getCurrentPassword() { return currentPassword; }
+    public String getCurrentFirstName() { return currentFirstName; }
+    public String getCurrentMiddleName() { return currentMiddleName; }
+    public String getCurrentLastName() { return currentLastName; }
+    public String getCurrentPreferredFirstName() { return currentPreferredFirstName; }
+    public String getCurrentEmailAddress() { return currentEmailAddress; }
+    public boolean getCurrentAdminRole() { return currentAdminRole; }
+    public boolean getCurrentNewRole1() { return currentNewRole1; }
+    public boolean getCurrentContributorRole() { return currentNewRole1; }
+    public boolean getCurrentNewRole2() { return currentNewRole2; }
+    public boolean getCurrentViewerRole() { return currentNewRole2; }
+
+    
+    /*******
+     * <p> Method: <p> Debugging method</p>
+     * 
+     * <p> Description: Debugging method that dumps the database of the console.</p>
+     * 
+     * @throws SQLException if there is an issues accessing the database.
+     * 
+     */
+    // Dumps the database.
+    public void dump() throws SQLException {
+        String query = "SELECT * FROM userDB";
+        ResultSet resultSet = statement.executeQuery(query);
+        ResultSetMetaData meta = resultSet.getMetaData();
+        while (resultSet.next()) {
+        for (int i = 0; i < meta.getColumnCount(); i++) {
+        System.out.println(
+        meta.getColumnLabel(i + 1) + ": " +
+                resultSet.getString(i + 1));
+        }
+        System.out.println();
+        }
+        resultSet.close();
+    }
+
+
     // Getter for current user Contributor role alias
     public boolean getCurrentContributorRole() { return currentNewRole1; };
+
 
     
     /*******
@@ -1079,8 +1477,6 @@ public class Database {
             e.printStackTrace();
             return false;
         }
-    }
-
     /*******
      * <p> Method: void closeConnection()</p>
      * 

@@ -1,6 +1,7 @@
 # Compiled Class files
 *.class
 bin/
+**/bin/
 out/
 build/
 
@@ -17,6 +18,7 @@ build/
 .project
 .classpath
 .settings/
+.recommenders/
 *.launch
 
 # IntelliJ IDEA
@@ -28,6 +30,10 @@ out/
 
 # VS Code
 .vscode/
+
+# Logs and Temporary Files
+*.log
+*.tmp
 
 # macOS artifacts
 .DS_Store

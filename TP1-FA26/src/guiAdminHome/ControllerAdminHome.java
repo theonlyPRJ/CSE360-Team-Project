@@ -1,10 +1,46 @@
 package guiAdminHome;
 
 import database.Database;
+
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import java.util.Optional;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.Scene;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import entityClasses.User;
+import java.util.List;
+
+/*******
+ * <p> Title: GUIAdminHomePage Class. </p>
+ * 
+ * <p> Description: The Java/FX-based Admin Home Page.  This class provides the controller actions
+ * basic on the user's use of the JavaFX GUI widgets defined by the View class.
+ * 
+ * This page contains a number of buttons that have not yet been implemented.  WHen those buttons
+ * are pressed, an alert pops up to tell the user that the function associated with the button has
+ * not been implemented. Also, be aware that What has been implemented may not work the way the
+ * final product requires and there maybe defects in this code.
+ * 
+ * The class has been written assuming that the View or the Model are the only class methods that
+ * can invoke these methods.  This is why each has been declared at "protected".  Do not change any
+ * of these methods to public.</p>
+ * 
+ * <p> Copyright: Lynn Robert Carter © 2025 </p>
+ * 
+ * @author Lynn Robert Carter
+ * 
+ * @version 1.00		2025-08-17 Initial version
+ * @version 1.01		2025-09-16 Update Javadoc documentation *  
+ */
+
 
 public class ControllerAdminHome {
 
@@ -38,6 +74,7 @@ public class ControllerAdminHome {
 			return;
 		}
 
+
 		// Exact required prompt: "Are you sure?"
 		Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
 		confirmAlert.setTitle("Confirm Deletion");
@@ -69,6 +106,192 @@ public class ControllerAdminHome {
 				errorAlert.setContentText("Failed to delete user account from the database.");
 				errorAlert.showAndWait();
 			}
+		
+		// Inform the user that the invitation has been sent and display the invitation code
+		String theSelectedRole = (String) ViewAdminHome.combobox_SelectRole.getValue();
+
+		// Map functional role display names to underlying database role keys
+		String dbRoleKey = theSelectedRole;
+		if ("Contributor".equals(theSelectedRole)) {
+			dbRoleKey = "Role1";
+		} else if ("Viewer".equals(theSelectedRole)) {
+			dbRoleKey = "Role2";
+		}
+
+		String invitationCode = theDatabase.generateInvitationCode(emailAddress,
+				dbRoleKey);
+		String msg = "Code: " + invitationCode + " for role " + theSelectedRole + 
+				" was sent to: " + emailAddress;
+		System.out.println(msg);
+		ViewAdminHome.alertEmailSent.setContentText(msg);
+		ViewAdminHome.alertEmailSent.showAndWait();
+		
+		// Update the Admin Home pages status
+		ViewAdminHome.text_InvitationEmailAddress.setText("");
+		ViewAdminHome.label_NumberOfInvitations.setText("Number of outstanding invitations: " + 
+				theDatabase.getNumberOfInvitations());
+	}
+	
+	/**********
+	 * <p> 
+	 * 
+	 * Title: manageInvitations () Method. </p>
+	 * 
+	 * <p> Description: Protected method that is currently a stub informing the user that
+	 * this function has not yet been implemented. </p>
+	 */
+	protected static void manageInvitations () {
+		System.out.println("\n*** WARNING ***: Manage Invitations Not Yet Implemented");
+		ViewAdminHome.alertNotImplemented.setTitle("*** WARNING ***");
+		ViewAdminHome.alertNotImplemented.setHeaderText("Manage Invitations Issue");
+		ViewAdminHome.alertNotImplemented.setContentText("Manage Invitations Not Yet Implemented");
+		ViewAdminHome.alertNotImplemented.showAndWait();
+	}
+	
+	/**********
+	 * <p> 
+	 * 
+	 * Title: setOnetimePassword () Method. </p>
+	 * 
+	 * <p> Description: Protected method that is currently a stub informing the user that
+	 * this function has not yet been implemented. </p>
+	 */
+	protected static void setOnetimePassword () {
+		System.out.println("\n*** WARNING ***: One-Time Password Not Yet Implemented");
+		ViewAdminHome.alertNotImplemented.setTitle("*** WARNING ***");
+		ViewAdminHome.alertNotImplemented.setHeaderText("One-Time Password Issue");
+		ViewAdminHome.alertNotImplemented.setContentText("One-Time Password Not Yet Implemented");
+		ViewAdminHome.alertNotImplemented.showAndWait();
+	}
+	
+	/**********
+	 * <p> 
+	 * 
+	 * Title: deleteUser () Method. </p>
+	 * 
+	 * <p> Description: Protected method that is currently a stub informing the user that
+	 * this function has not yet been implemented. </p>
+	 */
+	protected static void deleteUser() {
+		System.out.println("\n*** WARNING ***: Delete User Not Yet Implemented");
+		ViewAdminHome.alertNotImplemented.setTitle("*** WARNING ***");
+		ViewAdminHome.alertNotImplemented.setHeaderText("Delete User Issue");
+		ViewAdminHome.alertNotImplemented.setContentText("Delete User Not Yet Implemented");
+		ViewAdminHome.alertNotImplemented.showAndWait();
+	}
+	
+	// Helper class for TableView binding
+	public static class UserTableEntry {
+		private final String username;
+		private final String fullName;
+		private final String email;
+		private final String roles;
+		
+		public UserTableEntry(String username, String fullName, String email, String roles) {
+			this.username = username;
+			this.fullName = fullName;
+			this.email= email;
+			this.roles = roles;
+		}
+		
+		public String getUsername() {return username;}
+		public String getFullName() {return fullName;}
+		public String getEmail() {return email;}
+		public String getRoles() {return roles;}
+	}
+	
+	/**********
+	 * <p> 
+	 * 
+	 * Title: listUsers () Method. </p>
+	 * 
+	 * <p> Description: list user function 9-19-2026. </p>
+	 */
+	protected static void listUsers() {
+		// 1. Fetch user accounts from database
+	    List<User> userList = theDatabase.getAllUsers();
+	    ObservableList<User> data = FXCollections.observableArrayList(userList);
+
+	    // 2. Build JavaFX TableView
+	    TableView<UserTableEntry> table = new TableView<>();
+
+	    TableColumn<UserTableEntry, String> colUser = new TableColumn<>("Username");
+	    colUser.setCellValueFactory(new PropertyValueFactory<>("username"));
+
+	    TableColumn<UserTableEntry, String> colName = new TableColumn<>("Name");
+	    colName.setCellValueFactory(new PropertyValueFactory<>("fullName"));
+
+	    TableColumn<UserTableEntry, String> colEmail = new TableColumn<>("Email");
+	    colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+
+	    TableColumn<UserTableEntry, String> colRoles = new TableColumn<>("Assigned Roles");
+	    colRoles.setCellValueFactory(new PropertyValueFactory<>("roles"));
+
+	    table.getColumns().addAll(colUser, colName, colEmail, colRoles);
+
+	    // Populate rows
+	    ObservableList<UserTableEntry> tableEntries = FXCollections.observableArrayList();
+	    for (User u : userList) {
+	        String fullName = u.getFirstName() + " " + u.getLastName();
+	        
+	        // Build roles string
+	        StringBuilder roles = new StringBuilder();
+	        if (u.getAdminRole()) roles.append("Admin ");
+	        if (u.getNewRole1()) roles.append("Role1 ");
+	        if (u.getNewRole2()) roles.append("Role2 ");
+
+	        tableEntries.add(new UserTableEntry(u.getUserName(), fullName.trim(), u.getEmailAddress(), roles.toString().trim()));
+	    }
+	    table.setItems(tableEntries);
+
+	    // 3. Display in a Modal Window
+	    Stage dialog = new Stage();
+	    dialog.initModality(Modality.APPLICATION_MODAL);
+	    dialog.setTitle("All System User Accounts");
+
+	    VBox layout = new VBox(10);
+	    layout.getChildren().add(table);
+
+	    Scene scene = new Scene(layout, 600, 400);
+	    dialog.setScene(scene);
+	    dialog.showAndWait();
+	}
+	
+	/**********
+	 * <p> 
+	 * 
+	 * Title: addRemoveRoles () Method. </p>
+	 * 
+	 * <p> Description: Protected method that allows an admin to add and remove roles for any of
+	 * the users currently in the system.  This is done by invoking the AddRemoveRoles Page. There
+	 * is no need to specify the home page for the return as this can only be initiated by and
+	 * Admin.</p>
+	 */
+	protected static void addRemoveRoles() {
+		guiAddRemoveRoles.ViewAddRemoveRoles.displayAddRemoveRoles(ViewAdminHome.theStage, 
+				ViewAdminHome.theUser);
+	}
+	
+	/**********
+	 * <p> 
+	 * 
+	 * Title: invalidEmailAddress () Method. </p>
+	 * 
+	 * <p> Description: Protected method that is intended to check an email address before it is
+	 * used to reduce errors.  The code currently only checks to see that the email address is not
+	 * empty.  In the future, a syntactic check must be performed and maybe there is a way to check
+	 * if a properly email address is active.</p>
+	 * 
+	 * @param emailAddress	This String holds what is expected to be an email address
+	 */
+	protected static boolean invalidEmailAddress(String emailAddress) {
+		// Verify email is non-empty and enforces the universal 320-character maximum ceiling
+		if (emailAddress == null || emailAddress.length() == 0 || emailAddress.length() > 320) {
+			ViewAdminHome.alertEmailError.setContentText(
+					"Correct the email address (1-320 characters) and try again.");
+			ViewAdminHome.alertEmailError.showAndWait();
+			return true;
+
 		}
 	}
 
