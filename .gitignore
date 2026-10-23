@@ -4,6 +4,7 @@ bin/
 **/bin/
 out/
 build/
+doc/
 
 # Package Files
 *.jar
