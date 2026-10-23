@@ -162,7 +162,7 @@ public class ViewAddRemoveRoles {
      * each GUI object. </p>
      * 
      * This is a singleton, so this is performed just one.  Subsequent uses fill in the changeable
-     * fields using the displayAddRempoveRoles method.</p>
+     * fields using the displayAddRempoveRoles method</p>
      * 
      */
     public ViewAddRemoveRoles() {
