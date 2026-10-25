@@ -11,6 +11,8 @@ import java.util.UUID;
 
 import entityClasses.User;
 
+import entityClasses.LessonLearned;
+
 /*******
  * <p> Title: Database Class. </p>
  * 
@@ -72,6 +74,8 @@ public class Database {
     }
     
     
+    
+    
 /*******
  * <p> Method: connectToDatabase </p>
  * 
@@ -119,6 +123,17 @@ public class Database {
                 + "oneTimePassword VARCHAR(255) DEFAULT NULL, "
                 + "isOtpActive BOOL DEFAULT FALSE)";
         statement.execute(userTable);
+        
+        //LessonShare
+        String lessonsTable = "CREATE TABLE IF NOT EXISTS lessonsLearned ("
+                + "id INT AUTO_INCREMENT PRIMARY KEY, "
+                + "title VARCHAR(255) NOT NULL, "
+                + "description CLOB NOT NULL, "
+                + "author VARCHAR(255) NOT NULL, "
+                + "category VARCHAR(255) NOT NULL, "
+                + "createdAt BIGINT NOT NULL)";
+        statement.execute(lessonsTable);
+        
         
         // Ensure column additions for existing tables
         try {
@@ -234,7 +249,7 @@ public class Database {
  * <p> Method: List getUserList() </p>
  * 
  * <P> Description: Generate an List of Strings, one for each user in the database,
- * starting with "<Select User>" at the start of the list. </p>
+ * starting with "&lt;Select User&gt;" at the start of the list. </p>
  * 
  * @return a list of userNames found in the database.
  */
@@ -1157,4 +1172,166 @@ public class Database {
             se.printStackTrace(); 
         } 
     }
+//}
+
+//=========================================================================
+// HW2: LESSONS LEARNED CRUD OPERATIONS
+// =========================================================================
+
+/**
+ * CREATE: Inserts a new validated LessonLearned into the persistent H2 database.
+ * 
+ * @param lesson The lesson entity to insert
+ * @return The auto-generated database primary key ID, or -1 if insertion fails
+ * @throws SQLException on database connectivity or query errors
+ */
+public int createLesson(entityClasses.LessonLearned lesson) throws SQLException {
+    if (lesson == null) {
+        return -1;
+    }
+
+    String sql = "INSERT INTO lessonsLearned (title, description, author, category, createdAt) "
+               + "VALUES (?, ?, ?, ?, ?)";
+
+    try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        pstmt.setString(1, lesson.getTitle().trim());
+        pstmt.setString(2, lesson.getDescription().trim());
+        pstmt.setString(3, lesson.getAuthor().trim());
+        pstmt.setString(4, lesson.getCategory().trim());
+        pstmt.setLong(5, System.currentTimeMillis());
+
+        int affectedRows = pstmt.executeUpdate();
+        if (affectedRows == 0) {
+            return -1;
+        }
+
+        try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+            if (generatedKeys.next()) {
+                int generatedId = generatedKeys.getInt(1);
+                lesson.setId(generatedId);
+                return generatedId;
+            }
+        }
+    }
+    return -1;
 }
+
+/**
+ * READ (ALL): Retrieves all stored lessons learned ordered by ID descending.
+ * 
+ * @return List of all stored LessonLearned objects
+ * @throws SQLException on query execution error
+ */
+public List<entityClasses.LessonLearned> getAllLessons() throws SQLException {
+    List<entityClasses.LessonLearned> list = new ArrayList<>();
+    String sql = "SELECT id, title, description, author, category, createdAt FROM lessonsLearned ORDER BY id DESC";
+
+    try (PreparedStatement pstmt = connection.prepareStatement(sql);
+         ResultSet rs = pstmt.executeQuery()) {
+        while (rs.next()) {
+            entityClasses.LessonLearned lesson = new entityClasses.LessonLearned(
+                rs.getInt("id"),
+                rs.getString("title"),
+                rs.getString("description"),
+                rs.getString("author"),
+                rs.getString("category"),
+                rs.getLong("createdAt")
+            );
+            list.add(lesson);
+        }
+    }
+    return list;
+}
+
+/**
+ * READ (SUBSET): Filters lessons by keyword and optional category (Supports arbitrary subset).
+ * 
+ * @param keyword  Search term matched against title or description (case-insensitive)
+ * @param category Exact category match, or null/empty/"All" for any category
+ * @return Arbitrary subset list matching the query criteria (can be empty)
+ * @throws SQLException on query execution error
+ */
+public List<entityClasses.LessonLearned> searchLessons(String keyword, String category) throws SQLException {
+    List<entityClasses.LessonLearned> subset = new ArrayList<>();
+    StringBuilder sql = new StringBuilder(
+        "SELECT id, title, description, author, category, createdAt FROM lessonsLearned WHERE 1=1"
+    );
+
+    boolean hasKeyword = (keyword != null && !keyword.trim().isEmpty());
+    boolean hasCategory = (category != null && !category.trim().isEmpty() && !category.equalsIgnoreCase("All"));
+
+    if (hasKeyword) {
+        sql.append(" AND (LOWER(title) LIKE ? OR LOWER(description) LIKE ?)");
+    }
+    if (hasCategory) {
+        sql.append(" AND category = ?");
+    }
+    sql.append(" ORDER BY id DESC");
+
+    try (PreparedStatement pstmt = connection.prepareStatement(sql.toString())) {
+        int paramIdx = 1;
+        if (hasKeyword) {
+            String searchPattern = "%" + keyword.trim().toLowerCase() + "%";
+            pstmt.setString(paramIdx++, searchPattern);
+            pstmt.setString(paramIdx++, searchPattern);
+        }
+        if (hasCategory) {
+            pstmt.setString(paramIdx++, category.trim());
+        }
+
+        try (ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                subset.add(new entityClasses.LessonLearned(
+                    rs.getInt("id"),
+                    rs.getString("title"),
+                    rs.getString("description"),
+                    rs.getString("author"),
+                    rs.getString("category"),
+                    rs.getLong("createdAt")
+                ));
+            }
+        }
+    }
+    return subset;
+}
+
+/**
+ * UPDATE: Updates the title, description, and category of an existing lesson by ID.
+ * 
+ * @param id          The primary key of the record to update
+ * @param title       New title (4-64 characters)
+ * @param description New description (10-1000 characters)
+ * @param category    New category
+ * @return true if row was successfully updated, false if record does not exist
+ * @throws SQLException on database update error
+ */
+public boolean updateLesson(int id, String title, String description, String category) throws SQLException {
+    String sql = "UPDATE lessonsLearned SET title = ?, description = ?, category = ? WHERE id = ?";
+
+    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        pstmt.setString(1, title.trim());
+        pstmt.setString(2, description.trim());
+        pstmt.setString(3, category.trim());
+        pstmt.setInt(4, id);
+
+        int rowsAffected = pstmt.executeUpdate();
+        return rowsAffected > 0;
+    }
+}
+
+/**
+ * DELETE: Permanently removes a lesson learned record by unique primary key ID.
+ * 
+ * @param id The unique record ID to delete
+ * @return true if deleted, false if record ID does not exist in the database
+ * @throws SQLException on database deletion error
+ */
+public boolean deleteLesson(int id) throws SQLException {
+    String sql = "DELETE FROM lessonsLearned WHERE id = ?";
+
+    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        pstmt.setInt(1, id);
+        int rowsAffected = pstmt.executeUpdate();
+        return rowsAffected > 0;
+    }
+}}
