@@ -124,14 +124,19 @@ public class Database {
                 + "isOtpActive BOOL DEFAULT FALSE)";
         statement.execute(userTable);
         
-        //LessonShare
+        //LessonShare (Updated with experience and locking columns)
         String lessonsTable = "CREATE TABLE IF NOT EXISTS lessonsLearned ("
-                + "id INT AUTO_INCREMENT PRIMARY KEY, "
+        		+ "id INT AUTO_INCREMENT PRIMARY KEY, "
                 + "title VARCHAR(255) NOT NULL, "
                 + "description CLOB NOT NULL, "
                 + "author VARCHAR(255) NOT NULL, "
                 + "category VARCHAR(255) NOT NULL, "
-                + "createdAt BIGINT NOT NULL)";
+                + "createdAt BIGINT NOT NULL, "
+                + "experienceDetails CLOB, "
+                + "timeSpentMinutes INT DEFAULT 0, "
+                + "teamEffort VARCHAR(255), "
+                + "isLocked BOOLEAN DEFAULT FALSE, "
+                + "isDescriptionLocked BOOLEAN DEFAULT FALSE)";
         statement.execute(lessonsTable);
         
         
@@ -1334,4 +1339,66 @@ public boolean deleteLesson(int id) throws SQLException {
         int rowsAffected = pstmt.executeUpdate();
         return rowsAffected > 0;
     }
-}}
+}
+    
+/**
+ * READ (BY AUTHOR): Retrieves all lessons created by a specific contributor username.
+ * 
+ * @param author The username of the contributor
+ * @return List of LessonLearned objects created by the specified author
+ * @throws SQLException on query execution error
+ */
+public List<entityClasses.LessonLearned> getLessonsByAuthor(String author) throws SQLException {
+    List<entityClasses.LessonLearned> list = new ArrayList<>();
+    String sql = "SELECT id, title, description, author, category, createdAt, "
+               + "experienceDetails, timeSpentMinutes, teamEffort, isLocked, isDescriptionLocked "
+               + "FROM lessonsLearned WHERE author = ? ORDER BY id DESC";
+
+    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        pstmt.setString(1, author.trim());
+        try (ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                entityClasses.LessonLearned lesson = new entityClasses.LessonLearned(
+                    rs.getInt("id"),
+                    rs.getString("title"),
+                    rs.getString("description"),
+                    rs.getString("author"),
+                    rs.getString("category"),
+                    rs.getLong("createdAt")
+                );
+                lesson.setExperienceDetails(rs.getString("experienceDetails"));
+                lesson.setTimeSpentMinutes(rs.getInt("timeSpentMinutes"));
+                lesson.setTeamEffort(rs.getString("teamEffort"));
+                lesson.setLocked(rs.getBoolean("isLocked"));
+                lesson.setDescriptionLocked(rs.getBoolean("isDescriptionLocked"));
+                list.add(lesson);
+            }
+        }
+    }
+    return list;
+}
+
+/**
+ * UPDATE EXPERIENCE & LOCKS: Updates experience info and lock states for an existing lesson.
+ * 
+ * @param id The primary key ID of the lesson
+ * @param experienceDetails Experience notes
+ * @param timeSpentMinutes Time spent in minutes
+ * @param teamEffort Team effort breakdown
+ * @return true if successfully updated, false otherwise
+ * @throws SQLException on database update error
+ */
+public boolean updateLessonExperienceAndLocks(int id, String experienceDetails, int timeSpentMinutes, String teamEffort) throws SQLException {
+    String sql = "UPDATE lessonsLearned SET experienceDetails = ?, timeSpentMinutes = ?, teamEffort = ? WHERE id = ?";
+
+    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        pstmt.setString(1, experienceDetails != null ? experienceDetails.trim() : "");
+        pstmt.setInt(2, timeSpentMinutes);
+        pstmt.setString(3, teamEffort != null ? teamEffort.trim() : "");
+        pstmt.setInt(4, id);
+
+        int rowsAffected = pstmt.executeUpdate();
+        return rowsAffected > 0;
+    }
+}
+}

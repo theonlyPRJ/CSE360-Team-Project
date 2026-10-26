@@ -15,7 +15,8 @@ package entityClasses;
  * @author Gauri
  * @author Junbo You
  * 
- * @version 2.00    2026-10-22 Clean TP2 Phase Two Entity with TP3 forward attributes.
+ * @version 2.10    2026-10-26 Added Experience Info and Locking attributes.
+ * 
  */
 public class LessonLearned {
 
@@ -40,6 +41,25 @@ public class LessonLearned {
 
     /** Creation timestamp in epoch milliseconds. */
     private long createdAt;
+    
+    // --- Phase Two Contributor: Experience Information (Time & Effort) ---
+
+    /** Detailed account of what was done and how it was done during the lesson attempt. */
+    private String experienceDetails = "";
+
+    /** Time spent on the attempt measured in minutes. */
+    private int timeSpentMinutes = 0;
+
+    /** Contribution and effort breakdown of team members. */
+    private String teamEffort = "";
+
+    // --- Phase Two Contributor: Locking & Moderation Restrictions ---
+
+    /** Flag indicating whether the entire lesson has been locked by a curator. */
+    private boolean isLocked = false;
+
+    /** Flag indicating whether the description field specifically has been locked. */
+    private boolean isDescriptionLocked = false;
 
     // --- Forward-Compatible Attributes for TP3 Epics (Rubric 3.3) ---
 
@@ -54,6 +74,7 @@ public class LessonLearned {
 
     /** Status indicating senior staff/curator verification. */
     private boolean isVerified;
+    
 
     // =========================================================================
     // CONSTRUCTORS
@@ -294,5 +315,103 @@ public class LessonLearned {
      */
     public void setVerified(boolean isVerified) {
         this.isVerified = isVerified;
+    }
+    
+    // =========================================================================
+    // EXPERIENCE INFORMATION GETTERS & SETTERS (Phase Two Contributor)
+    // =========================================================================
+
+    /**
+     * Returns the experience details describing what was done and how.
+     * 
+     * @return experience details string
+     */
+    public String getExperienceDetails() {
+        return experienceDetails;
+    }
+
+    /**
+     * Sets the experience details.
+     * 
+     * @param experienceDetails experience description string
+     */
+    public void setExperienceDetails(String experienceDetails) {
+        this.experienceDetails = experienceDetails;
+    }
+
+    /**
+     * Returns the time spent on the lesson in minutes.
+     * 
+     * @return time spent in minutes
+     */
+    public int getTimeSpentMinutes() {
+        return timeSpentMinutes;
+    }
+
+    /**
+     * Sets the time spent on the lesson in minutes.
+     * 
+     * @param timeSpentMinutes integer minutes spent
+     */
+    public void setTimeSpentMinutes(int timeSpentMinutes) {
+        this.timeSpentMinutes = timeSpentMinutes;
+    }
+
+    /**
+     * Returns the team effort details.
+     * 
+     * @return team effort string
+     */
+    public String getTeamEffort() {
+        return teamEffort;
+    }
+
+    /**
+     * Sets the team effort details.
+     * 
+     * @param teamEffort team effort string
+     */
+    public void setTeamEffort(String teamEffort) {
+        this.teamEffort = teamEffort;
+    }
+
+    // =========================================================================
+    // LOCKING GETTERS & SETTERS (Phase Two Contributor)
+    // =========================================================================
+
+    /**
+     * Evaluates whether the entire lesson is locked from editing or deletion.
+     * 
+     * @return true if locked, false otherwise
+     */
+    public boolean isLocked() {
+        return isLocked;
+    }
+
+    /**
+     * Sets the lock state for the entire lesson.
+     * 
+     * @boolean locked boolean lock flag
+     */
+    public void setLocked(boolean locked) {
+        isLocked = locked;
+    }
+
+    /**
+     * Evaluates whether the description field is locked.
+     * 
+     * @return true if description is locked, false otherwise
+     */
+    public boolean isDescriptionLocked() {
+        return isDescriptionLocked;
+    }
+
+    /**
+     * Sets the lock state for the description field.
+     * 
+     * @param descriptionLocked boolean description lock flag
+     */
+    public void setDescriptionLocked(boolean descriptionLocked) {
+        isDescriptionLocked = descriptionLocked;
     }
 }

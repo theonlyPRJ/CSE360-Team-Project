@@ -84,7 +84,7 @@ public class ViewContributorHome {
     private static ObservableList<LessonLearned> lessonData = FXCollections.observableArrayList();
 
     // GUI Area 3
-    protected static Line line_Separator4 = new Line(20, 525, width - 20, 525);
+    protected static Line line_Separator4 = new Line(20, 595, width - 20, 595);
     protected static Button button_Logout = new Button("Logout");
     protected static Button button_Quit = new Button("Quit");
 
@@ -98,6 +98,18 @@ public class ViewContributorHome {
     
     private static Scene theViewContributorHomeScene;    
     protected static final int theRole = 2;
+    
+    // GUI Controls for Experience Information (Time & Effort Data)
+    protected static Label label_ExperienceDetails = new Label("Experience Details:");
+    protected static TextArea text_ExperienceDetails = new TextArea();
+
+    protected static Label label_TimeSpent = new Label("Time Spent (mins):");
+    protected static TextField text_TimeSpent = new TextField();
+
+    protected static Label label_TeamEffort = new Label("Team Effort:");
+    protected static TextField text_TeamEffort = new TextField();
+
+    protected static Button button_SaveExperience = new Button("Add Experience Info");
 
     /*-*******************************************************************************************
     Display and Setup Methods
@@ -187,7 +199,7 @@ public class ViewContributorHome {
         setupButtonUI(button_DeleteLesson, "Dialog", 12, 110, Pos.CENTER, 110, 365);
 
         // Status Feedback Banner
-        setupLabelUI(label_Status, "Dialog", 12, 350, Pos.BASELINE_LEFT, 25, 405);
+        setupLabelUI(label_Status, "Dialog", 12, 350, Pos.BASELINE_LEFT, 25, 575);
         label_Status.setStyle("-fx-text-fill: #0044cc; -fx-font-weight: bold;");
 
         // Right Column: Search Controls & Table View
@@ -205,6 +217,96 @@ public class ViewContributorHome {
         table_Lessons.setLayoutY(155);
         table_Lessons.setPrefWidth(420);
         table_Lessons.setPrefHeight(340);
+        
+        // Experience Information Widgets
+        setupLabelUI(label_TimeSpent, "Dialog", 12, 120, Pos.BASELINE_LEFT, 25, 405);
+        text_TimeSpent.setLayoutX(25);
+        text_TimeSpent.setLayoutY(430);
+        text_TimeSpent.setMaxWidth(130);
+        text_TimeSpent.setPromptText("Minutes");
+
+        setupLabelUI(label_TeamEffort, "Dialog", 12, 120, Pos.BASELINE_LEFT, 170, 405);
+        text_TeamEffort.setLayoutX(170);
+        text_TeamEffort.setLayoutY(430);
+        text_TeamEffort.setMinWidth(135);
+        text_TeamEffort.setPromptText("e.g. 2 devs, 5 hrs");
+
+        setupLabelUI(label_ExperienceDetails, "Dialog", 12, 200, Pos.BASELINE_LEFT, 25, 460);
+        text_ExperienceDetails.setLayoutX(25);
+        text_ExperienceDetails.setLayoutY(485);
+        text_ExperienceDetails.setPrefWidth(280);
+        text_ExperienceDetails.setPrefRowCount(2);
+        text_ExperienceDetails.setPromptText("What was done, how it was done...");
+
+        setupButtonUI(button_SaveExperience, "Dialog", 12, 150, Pos.CENTER, 25, 545);
+
+        // Selection & Locking Check Listener
+        table_Lessons.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, selected) -> {
+            if (selected != null) {
+                text_LessonID.setText(String.valueOf(selected.getId()));
+                text_Title.setText(selected.getTitle());
+                text_Description.setText(selected.getDescription());
+                text_Author.setText(selected.getAuthor());
+                text_Category.setText(selected.getCategory());
+
+                // Populate Experience Info
+                text_ExperienceDetails.setText(selected.getExperienceDetails() != null ? selected.getExperienceDetails() : "");
+                text_TimeSpent.setText(String.valueOf(selected.getTimeSpentMinutes()));
+                text_TeamEffort.setText(selected.getTeamEffort() != null ? selected.getTeamEffort() : "");
+
+                // Enforce Locking Rules (Prevent update/delete if locked by curator)
+                boolean isLocked = selected.isLocked();
+                button_UpdateLesson.setDisable(isLocked);
+                button_DeleteLesson.setDisable(isLocked);
+
+                if (isLocked) {
+                    label_Status.setText("This lesson is LOCKED and cannot be modified or deleted.");
+                    label_Status.setStyle("-fx-text-fill: orange; -fx-font-weight: bold;");
+                }
+            }
+        });
+
+        // Save Experience Info Action Handler 
+        button_SaveExperience.setOnAction(e -> {
+        	try {
+                int id = Integer.parseInt(text_LessonID.getText().trim());
+                String expDetails = text_ExperienceDetails.getText() == null ? "" : text_ExperienceDetails.getText().trim();
+                String teamEffort = text_TeamEffort.getText() == null ? "" : text_TeamEffort.getText().trim();
+                
+                String timeText = text_TimeSpent.getText() == null ? "" : text_TimeSpent.getText().trim();
+                if (timeText.isEmpty()) {
+                    label_Status.setText("Time spent cannot be empty.");
+                    label_Status.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+                    showAlert(Alert.AlertType.ERROR, "Validation Error", "Time spent (minutes) cannot be empty.");
+                    return;
+                }
+
+                int timeSpent = Integer.parseInt(timeText);
+                if (timeSpent < 0) {
+                    label_Status.setText("Time spent cannot be negative.");
+                    label_Status.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+                    showAlert(Alert.AlertType.ERROR, "Validation Error", "Time spent in minutes must be a positive integer (cannot be negative).");
+                    return;
+                }
+
+                boolean updated = theDatabase.updateLessonExperienceAndLocks(id, expDetails, timeSpent, teamEffort);
+                if (updated) {
+                    label_Status.setText("Experience information added for Lesson ID " + id + "!");
+                    label_Status.setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
+                    showAlert(Alert.AlertType.INFORMATION, "Success", "Experience information successfully updated.");
+                    loadAllLessonsIntoTable();
+                } else {
+                    label_Status.setText("Failed to update experience info. Record ID not found.");
+                    label_Status.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+                }
+            } catch (NumberFormatException ex) {
+                label_Status.setText("Invalid numeric input.");
+                label_Status.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+                showAlert(Alert.AlertType.ERROR, "Input Error", "Please provide a valid numeric Lesson ID and Time Spent (minutes).");
+            } catch (SQLException ex) {
+                showAlert(Alert.AlertType.ERROR, "Database Error", ex.getMessage());
+            }
+        });
 
         TableColumn<LessonLearned, Integer> colId = new TableColumn<>("ID");
 //        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -365,10 +467,10 @@ public class ViewContributorHome {
         });
 
         // GUI Area 3
-        setupButtonUI(button_Logout, "Dialog", 16, 220, Pos.CENTER, 40, 540);
+        setupButtonUI(button_Logout, "Dialog", 16, 220, Pos.CENTER, 40, 600);
         button_Logout.setOnAction(event -> ControllerContributorHome.performLogout());
         
-        setupButtonUI(button_Quit, "Dialog", 16, 220, Pos.CENTER, width - 260, 540);
+        setupButtonUI(button_Quit, "Dialog", 16, 220, Pos.CENTER, width - 260, 600);
         button_Quit.setOnAction(event -> ControllerContributorHome.performQuit());
 
         // Assemble Scene
@@ -379,17 +481,28 @@ public class ViewContributorHome {
             label_ID, text_LessonID, label_Search, text_Search,
             button_CreateLesson, button_UpdateLesson, button_DeleteLesson,
             button_SearchLessons, button_ViewAllLessons, label_Status, table_Lessons,
-            line_Separator4, button_Logout, button_Quit
+            line_Separator4, button_Logout, button_Quit, label_TimeSpent, text_TimeSpent, 
+            label_TeamEffort, text_TeamEffort, label_ExperienceDetails, 
+            text_ExperienceDetails, button_SaveExperience
         );
     }
 
     /*-********************************************************************************************
     Helper Methods
      *********************************************************************************************/
-
+    
+    /**
+     * Loads lessons into table filtered exclusively by current contributor username.
+     * <p> Requirement Trace: Satisfies Contributor User Story (contributors can only
+     * view their own lessons) </p>
+     */
     private static void loadAllLessonsIntoTable() {
-        try {
-            refreshTableWithList(theDatabase.getAllLessons());
+    	try {
+            if (theUser != null && theUser.getUserName() != null) {
+                refreshTableWithList(theDatabase.getLessonsByAuthor(theUser.getUserName()));
+            } else {
+                refreshTableWithList(theDatabase.getAllLessons());
+            }
         } catch (SQLException e) {
             System.err.println("Error fetching lessons from database: " + e.getMessage());
         }
