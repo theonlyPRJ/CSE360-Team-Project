@@ -4,25 +4,24 @@ package entityClasses;
  * <p> Title: LessonLearned Entity Class. </p>
  * 
  * <p> Description: Encapsulates all data attributes for an individual Lesson Learned.
- * Satisfies Contributor Phase Two User Stories (US-HW2-01 through US-HW2-04) and 
- * provides forward compatibility for TP3 Administrator moderation, peer review 
+ * Satisfies Contributor Phase Two User Stories (US-HW2-01 through US-HW2-04),
+ * supports experiential effort tracking and curator field-locking, and provides 
+ * forward compatibility for TP3 Administrator moderation, peer review 
  * endorsements, and staff verification epics. </p>
  * 
  * <p> Copyright: Lynn Robert Carter © 2025 </p>
  * 
  * @author Pranjal Singh
  * @author Sanidhya Tiwari
- * @author Gauri
+ * @author Gauri Taneja
  * @author Junbo You
  * 
- * @version 2.00    2026-10-22 Clean TP2 Phase Two Entity with TP3 forward attributes.
- * @version 2.10    2026-10-26 Added Experience Info and Locking attributes.
- * 
+ * @version 2.10    2026-10-26 Complete Entity supporting core, experience, curator locking, and TP3 forward fields.
  */
 public class LessonLearned {
 
     // =========================================================================
-    // ATTRIBUTES (Phase Two Contributor Core + TP3 Epics Forward Compatibility)
+    // 1. CORE CONTRIBUTOR ATTRIBUTES (Phase Two Baseline)
     // =========================================================================
 
     /** Primary key unique identifier in persistent relational database. */
@@ -37,35 +36,41 @@ public class LessonLearned {
     /** Username of the contributing team member author. */
     private String author;
 
-    /** Functional technical category/domain (e.g., GUI, Architecture, Database). */
+    /** Functional technical category or domain (e.g., GUI, Architecture, Database). */
     private String category;
 
     /** Creation timestamp in epoch milliseconds. */
     private long createdAt;
-    
-    // --- Phase Two Contributor: Experience Information (Time & Effort) ---
 
-    /** Detailed account of what was done and how it was done during the lesson attempt. */
+    // =========================================================================
+    // 2. EXPERIENCE & EFFORT TRACKING ATTRIBUTES
+    // =========================================================================
+
+    /** Contextual narrative detailing engineering experiences and nuances. */
     private String experienceDetails = "";
 
-    /** Time spent on the attempt measured in minutes. */
+    /** Quantitative effort metric measuring time invested in minutes. */
     private int timeSpentMinutes = 0;
 
-    /** Contribution and effort breakdown of team members. */
+    /** Narrative or qualitative assessment of team collaborative effort. */
     private String teamEffort = "";
 
-    // --- Phase Two Contributor: Locking & Moderation Restrictions ---
+    // =========================================================================
+    // 3. CURATOR & MODERATION LOCKING ATTRIBUTES
+    // =========================================================================
 
-    /** Flag indicating whether the entire lesson has been locked by a curator. */
+    /** Status flag indicating whether the entire lesson is locked from modification. */
     private boolean isLocked = false;
 
-    /** Flag indicating whether the description field specifically has been locked. */
+    /** Status flag indicating whether the descriptive body is locked by curators. */
     private boolean isDescriptionLocked = false;
 
-    // --- Forward-Compatible Attributes for TP3 Epics (Rubric 3.3) ---
+    // =========================================================================
+    // 4. FORWARD-COMPATIBLE ATTRIBUTES FOR TP3 EPICS (Rubric 3.3)
+    // =========================================================================
 
-    /** Flag indicating administrative review/moderation requirement. */
-    private boolean isFlagged;
+    /** Flag indicating administrative review or moderation requirement. */
+    private boolean isFlagged = false;
 
     /** Administrative explanation note justifying moderation or flag. */
     private String moderationNote = "";
@@ -73,15 +78,15 @@ public class LessonLearned {
     /** Aggregate count of community peer endorsements. */
     private int endorsementCount = 0;
 
-    /** Status indicating senior staff/curator verification. */
-    private boolean isVerified;
+    /** Status indicating senior staff or curator verification. */
+    private boolean isVerified = false;
 
     // =========================================================================
     // CONSTRUCTORS
     // =========================================================================
 
     /**
-     * Default constructor initializing default attribute states.
+     * Default constructor initializing default attribute states and sentinel values.
      */
     public LessonLearned() {
         this.id = -1;
@@ -90,6 +95,11 @@ public class LessonLearned {
         this.author = "";
         this.category = "";
         this.createdAt = System.currentTimeMillis();
+        this.experienceDetails = "";
+        this.timeSpentMinutes = 0;
+        this.teamEffort = "";
+        this.isLocked = false;
+        this.isDescriptionLocked = false;
         this.isFlagged = false;
         this.moderationNote = "";
         this.endorsementCount = 0;
@@ -109,7 +119,7 @@ public class LessonLearned {
     }
 
     /**
-     * Full parameterized constructor for reconstructing persistent records from H2 database queries.
+     * Full parameterized constructor for reconstructing persistent records from database queries.
      * 
      * @param id primary key identifier
      * @param title concise title
@@ -125,6 +135,11 @@ public class LessonLearned {
         this.author = author;
         this.category = category;
         this.createdAt = createdAt;
+        this.experienceDetails = "";
+        this.timeSpentMinutes = 0;
+        this.teamEffort = "";
+        this.isLocked = false;
+        this.isDescriptionLocked = false;
         this.isFlagged = false;
         this.moderationNote = "";
         this.endorsementCount = 0;
@@ -132,7 +147,7 @@ public class LessonLearned {
     }
 
     // =========================================================================
-    // GETTERS AND SETTERS
+    // CORE GETTERS AND SETTERS
     // =========================================================================
 
     /**
@@ -243,7 +258,107 @@ public class LessonLearned {
         this.createdAt = createdAt;
     }
 
-    // --- TP3 Forward-Compatible Getters and Setters (Rubric 3.3) ---
+    // =========================================================================
+    // EXPERIENCE & EFFORT GETTERS AND SETTERS
+    // =========================================================================
+
+    /**
+     * Returns the narrative experience details.
+     * 
+     * @return experience details string
+     */
+    public String getExperienceDetails() {
+        return experienceDetails;
+    }
+
+    /**
+     * Sets the narrative experience details.
+     * 
+     * @param experienceDetails experience details string
+     */
+    public void setExperienceDetails(String experienceDetails) {
+        this.experienceDetails = (experienceDetails != null) ? experienceDetails : "";
+    }
+
+    /**
+     * Returns the quantitative time spent in minutes.
+     * 
+     * @return integer time in minutes
+     */
+    public int getTimeSpentMinutes() {
+        return timeSpentMinutes;
+    }
+
+    /**
+     * Sets the quantitative time spent in minutes.
+     * 
+     * @param timeSpentMinutes integer time in minutes
+     */
+    public void setTimeSpentMinutes(int timeSpentMinutes) {
+        this.timeSpentMinutes = Math.max(0, timeSpentMinutes);
+    }
+
+    /**
+     * Returns the qualitative team effort narrative.
+     * 
+     * @return team effort narrative string
+     */
+    public String getTeamEffort() {
+        return teamEffort;
+    }
+
+    /**
+     * Sets the qualitative team effort narrative.
+     * 
+     * @param teamEffort team effort string
+     */
+    public void setTeamEffort(String teamEffort) {
+        this.teamEffort = (teamEffort != null) ? teamEffort : "";
+    }
+
+    // =========================================================================
+    // CURATOR LOCKING GETTERS AND SETTERS
+    // =========================================================================
+
+    /**
+     * Evaluates whether the entire lesson is locked from modification.
+     * 
+     * @return true if locked, false otherwise
+     */
+    public boolean isLocked() {
+        return isLocked;
+    }
+
+    /**
+     * Sets the global lock status for this lesson.
+     * 
+     * @param isLocked boolean lock state
+     */
+    public void setLocked(boolean isLocked) {
+        this.isLocked = isLocked;
+    }
+
+    /**
+     * Evaluates whether the description field is locked by curators.
+     * 
+     * @return true if description locked, false otherwise
+     */
+    public boolean isDescriptionLocked() {
+        return isDescriptionLocked;
+    }
+
+    /**
+     * Sets the description lock status for this lesson.
+     * 
+     * @param isDescriptionLocked boolean description lock state
+     */
+    public void setDescriptionLocked(boolean isDescriptionLocked) {
+        this.isDescriptionLocked = isDescriptionLocked;
+    }
+
+    // =========================================================================
+    // TP3 FORWARD-COMPATIBLE GETTERS AND SETTERS (Rubric 3.3)
+    // =========================================================================
 
     /**
      * Evaluates whether this record has been flagged for administrative review.
@@ -253,34 +368,7 @@ public class LessonLearned {
     public boolean isFlagged() {
         return isFlagged;
     }
-    
-    /**
-     * Evaluates whether this lesson has been officially verified by staff/curators.
-     * 
-     * @return true if verified, false otherwise
-     */
-    public boolean isVerified() {
-        return isVerified;
-    }
-    
-    /**
-     * Returns the administrative moderation explanation note.
-     * 
-     * @return moderation note string
-     */
-    public String getModerationNote() {
-        return moderationNote;
-    }
 
-    /**
-     * Returns the aggregate count of community peer endorsements.
-     * 
-     * @return peer endorsement counter value
-     */
-    public int getEndorsementCount() {
-        return endorsementCount;
-    }
-    
     /**
      * Sets the administrative review flag on this record.
      * 
@@ -291,12 +379,30 @@ public class LessonLearned {
     }
 
     /**
+     * Returns the administrative moderation explanation note.
+     * 
+     * @return moderation note string
+     */
+    public String getModerationNote() {
+        return moderationNote;
+    }
+
+    /**
      * Sets the administrative moderation explanation note.
      * 
      * @param moderationNote moderation explanation string
      */
     public void setModerationNote(String moderationNote) {
-        this.moderationNote = moderationNote;
+        this.moderationNote = (moderationNote != null) ? moderationNote : "";
+    }
+
+    /**
+     * Returns the aggregate count of community peer endorsements.
+     * 
+     * @return peer endorsement counter value
+     */
+    public int getEndorsementCount() {
+        return endorsementCount;
     }
 
     /**
@@ -305,7 +411,16 @@ public class LessonLearned {
      * @param endorsementCount integer counter value
      */
     public void setEndorsementCount(int endorsementCount) {
-        this.endorsementCount = endorsementCount;
+        this.endorsementCount = Math.max(0, endorsementCount);
+    }
+
+    /**
+     * Evaluates whether this lesson has been officially verified by staff or curators.
+     * 
+     * @return true if verified, false otherwise
+     */
+    public boolean isVerified() {
+        return isVerified;
     }
 
     /**
