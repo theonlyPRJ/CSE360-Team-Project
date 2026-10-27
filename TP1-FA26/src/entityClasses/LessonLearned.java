@@ -16,6 +16,8 @@ package entityClasses;
  * @author Junbo You
  * 
  * @version 2.00    2026-10-22 Clean TP2 Phase Two Entity with TP3 forward attributes.
+ * @version 2.10    2026-10-26 Added Experience Info and Locking attributes.
+ * 
  */
 public class LessonLearned {
 
@@ -40,6 +42,25 @@ public class LessonLearned {
 
     /** Creation timestamp in epoch milliseconds. */
     private long createdAt;
+    
+    // --- Phase Two Contributor: Experience Information (Time & Effort) ---
+
+    /** Detailed account of what was done and how it was done during the lesson attempt. */
+    private String experienceDetails = "";
+
+    /** Time spent on the attempt measured in minutes. */
+    private int timeSpentMinutes = 0;
+
+    /** Contribution and effort breakdown of team members. */
+    private String teamEffort = "";
+
+    // --- Phase Two Contributor: Locking & Moderation Restrictions ---
+
+    /** Flag indicating whether the entire lesson has been locked by a curator. */
+    private boolean isLocked = false;
+
+    /** Flag indicating whether the description field specifically has been locked. */
+    private boolean isDescriptionLocked = false;
 
     // --- Forward-Compatible Attributes for TP3 Epics (Rubric 3.3) ---
 
